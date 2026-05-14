@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound;
+
+option java_package = "com.ppb.gamestate.api.outbound";
+option java_outer_classname = "GameStateOutbound";
+
+import "game_state_api_outbound_meta.proto";
+import "game_state_api_outbound_fixture.proto";
+import "game_state_api_outbound_stats.proto";
+import "game_state_api_outbound_participant.proto";
+import "game_state_api_outbound_incident.proto";
+
+message Api {
+    com.ppb.gamestate.api.outbound.meta.Meta meta = 1;
+    com.ppb.gamestate.api.outbound.fixture.Fixture fixture = 2;
+    com.ppb.gamestate.api.outbound.stat.Stats stats = 5;
+    repeated com.ppb.gamestate.api.outbound.participant.Participant participants = 3;
+    repeated com.ppb.gamestate.api.outbound.incident.Incident incidents = 4;
+}

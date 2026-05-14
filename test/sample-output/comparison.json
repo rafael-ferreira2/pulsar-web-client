@@ -1,0 +1,428 @@
+{
+  "meta": {
+    "exportedAt": "2026-05-14T13:00:02.000Z",
+    "correlationKey": "meta.gameStateId",
+    "schemaMatchPct": 50,
+    "sourceA": {
+      "bus": "pulsar",
+      "env": "staging",
+      "topic": "persistent://gcd/soccer-inbound/game-state",
+      "description": "Pulsar staging soccer gamestate (rendered output)."
+    },
+    "sourceB": {
+      "bus": "kafka",
+      "env": "kafka-stg",
+      "topic": "trading.soccer.nxt.sgt",
+      "description": "GCD source Kafka topic on UKI MSK."
+    },
+    "counts": {
+      "a": 3,
+      "b": 3,
+      "matched": 1
+    }
+  },
+  "diff": {
+    "structure": {
+      "rows": [
+        {
+          "path": "kafkaOffset",
+          "a": "—",
+          "b": "number",
+          "kind": "onlyB",
+          "label": "B only",
+          "isType": true
+        },
+        {
+          "path": "meta.fixtureId",
+          "a": "string",
+          "b": "number",
+          "kind": "typediff",
+          "label": "Type ≠",
+          "isType": true
+        },
+        {
+          "path": "meta.gameStateId",
+          "a": "string",
+          "b": "string",
+          "kind": "match",
+          "label": "OK",
+          "isType": true
+        },
+        {
+          "path": "meta.region",
+          "a": "string",
+          "b": "—",
+          "kind": "onlyA",
+          "label": "A only",
+          "isType": true
+        },
+        {
+          "path": "pulsarTimestamp",
+          "a": "number",
+          "b": "—",
+          "kind": "onlyA",
+          "label": "A only",
+          "isType": true
+        },
+        {
+          "path": "score.away",
+          "a": "number",
+          "b": "number",
+          "kind": "match",
+          "label": "OK",
+          "isType": true
+        },
+        {
+          "path": "score.home",
+          "a": "number",
+          "b": "number",
+          "kind": "match",
+          "label": "OK",
+          "isType": true
+        },
+        {
+          "path": "status",
+          "a": "string",
+          "b": "string",
+          "kind": "match",
+          "label": "OK",
+          "isType": true
+        }
+      ],
+      "nMatch": 4,
+      "nType": 1,
+      "nA": 2,
+      "nB": 1,
+      "total": 8,
+      "matchPct": 50,
+      "sharedDenom": 8
+    },
+    "values": {
+      "rows": [
+        {
+          "path": "meta.fixtureId",
+          "a": "99",
+          "b": 99,
+          "kind": "equal",
+          "label": "Equal"
+        },
+        {
+          "path": "meta.gameStateId",
+          "a": "g-42",
+          "b": "g-42",
+          "kind": "equal",
+          "label": "Equal"
+        },
+        {
+          "path": "score.away",
+          "a": 0,
+          "b": 0,
+          "kind": "equal",
+          "label": "Equal"
+        },
+        {
+          "path": "score.home",
+          "a": 1,
+          "b": 0,
+          "kind": "diff",
+          "label": "Differs"
+        },
+        {
+          "path": "status",
+          "a": "LIVE",
+          "b": "LIVE",
+          "kind": "equal",
+          "label": "Equal"
+        }
+      ],
+      "nEq": 4,
+      "nDiff": 1,
+      "totalShared": 5
+    },
+    "both": {
+      "rows": [
+        {
+          "path": "kafkaOffset",
+          "a": "—",
+          "b": 17,
+          "kind": "onlyB",
+          "label": "B only"
+        },
+        {
+          "path": "meta.fixtureId",
+          "a": "99",
+          "b": 99,
+          "kind": "typediff",
+          "label": "Type ≠ (string / number)"
+        },
+        {
+          "path": "meta.gameStateId",
+          "a": "g-42",
+          "b": "g-42",
+          "kind": "equal",
+          "label": "Equal"
+        },
+        {
+          "path": "meta.region",
+          "a": "EU",
+          "b": "—",
+          "kind": "onlyA",
+          "label": "A only"
+        },
+        {
+          "path": "pulsarTimestamp",
+          "a": 1715587200000,
+          "b": "—",
+          "kind": "onlyA",
+          "label": "A only"
+        },
+        {
+          "path": "score.away",
+          "a": 0,
+          "b": 0,
+          "kind": "equal",
+          "label": "Equal"
+        },
+        {
+          "path": "score.home",
+          "a": 1,
+          "b": 0,
+          "kind": "diff",
+          "label": "Differs"
+        },
+        {
+          "path": "status",
+          "a": "LIVE",
+          "b": "LIVE",
+          "kind": "equal",
+          "label": "Equal"
+        }
+      ],
+      "nEq": 3,
+      "nDiff": 1,
+      "nType": 1,
+      "nA": 2,
+      "nB": 1
+    }
+  },
+  "pairs": [
+    {
+      "key": "g-42",
+      "a": {
+        "ts": "2026-05-14T13:00:00.000Z",
+        "content": {
+          "meta": {
+            "gameStateId": "g-42",
+            "fixtureId": "99",
+            "region": "EU"
+          },
+          "score": {
+            "home": 1,
+            "away": 0
+          },
+          "status": "LIVE",
+          "pulsarTimestamp": 1715587200000
+        }
+      },
+      "b": {
+        "ts": "2026-05-14T13:00:01.500Z",
+        "content": {
+          "meta": {
+            "gameStateId": "g-42",
+            "fixtureId": 99
+          },
+          "score": {
+            "home": 0,
+            "away": 0
+          },
+          "status": "LIVE",
+          "kafkaOffset": 17
+        }
+      },
+      "diff": {
+        "structure": {
+          "rows": [
+            {
+              "path": "kafkaOffset",
+              "a": "—",
+              "b": "number",
+              "kind": "onlyB",
+              "label": "B only",
+              "isType": true
+            },
+            {
+              "path": "meta.fixtureId",
+              "a": "string",
+              "b": "number",
+              "kind": "typediff",
+              "label": "Type ≠",
+              "isType": true
+            },
+            {
+              "path": "meta.gameStateId",
+              "a": "string",
+              "b": "string",
+              "kind": "match",
+              "label": "OK",
+              "isType": true
+            },
+            {
+              "path": "meta.region",
+              "a": "string",
+              "b": "—",
+              "kind": "onlyA",
+              "label": "A only",
+              "isType": true
+            },
+            {
+              "path": "pulsarTimestamp",
+              "a": "number",
+              "b": "—",
+              "kind": "onlyA",
+              "label": "A only",
+              "isType": true
+            },
+            {
+              "path": "score.away",
+              "a": "number",
+              "b": "number",
+              "kind": "match",
+              "label": "OK",
+              "isType": true
+            },
+            {
+              "path": "score.home",
+              "a": "number",
+              "b": "number",
+              "kind": "match",
+              "label": "OK",
+              "isType": true
+            },
+            {
+              "path": "status",
+              "a": "string",
+              "b": "string",
+              "kind": "match",
+              "label": "OK",
+              "isType": true
+            }
+          ],
+          "nMatch": 4,
+          "nType": 1,
+          "nA": 2,
+          "nB": 1,
+          "total": 8,
+          "matchPct": 50,
+          "sharedDenom": 8
+        },
+        "values": {
+          "rows": [
+            {
+              "path": "meta.fixtureId",
+              "a": "99",
+              "b": 99,
+              "kind": "equal",
+              "label": "Equal"
+            },
+            {
+              "path": "meta.gameStateId",
+              "a": "g-42",
+              "b": "g-42",
+              "kind": "equal",
+              "label": "Equal"
+            },
+            {
+              "path": "score.away",
+              "a": 0,
+              "b": 0,
+              "kind": "equal",
+              "label": "Equal"
+            },
+            {
+              "path": "score.home",
+              "a": 1,
+              "b": 0,
+              "kind": "diff",
+              "label": "Differs"
+            },
+            {
+              "path": "status",
+              "a": "LIVE",
+              "b": "LIVE",
+              "kind": "equal",
+              "label": "Equal"
+            }
+          ],
+          "nEq": 4,
+          "nDiff": 1,
+          "totalShared": 5
+        },
+        "both": {
+          "rows": [
+            {
+              "path": "kafkaOffset",
+              "a": "—",
+              "b": 17,
+              "kind": "onlyB",
+              "label": "B only"
+            },
+            {
+              "path": "meta.fixtureId",
+              "a": "99",
+              "b": 99,
+              "kind": "typediff",
+              "label": "Type ≠ (string / number)"
+            },
+            {
+              "path": "meta.gameStateId",
+              "a": "g-42",
+              "b": "g-42",
+              "kind": "equal",
+              "label": "Equal"
+            },
+            {
+              "path": "meta.region",
+              "a": "EU",
+              "b": "—",
+              "kind": "onlyA",
+              "label": "A only"
+            },
+            {
+              "path": "pulsarTimestamp",
+              "a": 1715587200000,
+              "b": "—",
+              "kind": "onlyA",
+              "label": "A only"
+            },
+            {
+              "path": "score.away",
+              "a": 0,
+              "b": 0,
+              "kind": "equal",
+              "label": "Equal"
+            },
+            {
+              "path": "score.home",
+              "a": 1,
+              "b": 0,
+              "kind": "diff",
+              "label": "Differs"
+            },
+            {
+              "path": "status",
+              "a": "LIVE",
+              "b": "LIVE",
+              "kind": "equal",
+              "label": "Equal"
+            }
+          ],
+          "nEq": 3,
+          "nDiff": 1,
+          "nType": 1,
+          "nA": 2,
+          "nB": 1
+        }
+      }
+    }
+  ]
+}

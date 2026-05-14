@@ -1,0 +1,210 @@
+/* ═══════════════════════════════════════════════════════════
+   GCD Streaming Client — FanDuel-themed design system
+   Single source of truth for colors, navbar, buttons, badges.
+   Page-specific styles live inline in each HTML file.
+
+   Accent palette mirrors FanDuel.com (electric "FanDuel Blue"
+   #1493FF) on top of a dark, developer-friendly canvas — this
+   is an internal diagnostics tool intended for long sessions.
+   Typography uses Inter (loaded from Google Fonts in the page
+   <head>) with a system stack fallback so it still renders if
+   the CDN is unreachable.
+   ═══════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Surfaces (dark theme — easy on the eyes for long debugging sessions) */
+  --bg:            #0a1220;
+  --bg-elev:       #0f1b2e;
+  --bg-elev-2:     #142340;
+  --surface:       #1a2c4d;
+  --border:        #243556;
+  --border-strong: #2f4a7a;
+
+  /* Text */
+  --text:        #ebf3ff;
+  --text-muted:  #8aa1c7;
+  --text-dim:    #6680a8;
+
+  /* FanDuel brand */
+  --fd-blue:        #1493FF;   /* canonical FanDuel blue */
+  --fd-blue-bright: #4DB1FF;   /* hover / hilite */
+  --fd-blue-deep:   #0E80E1;   /* pressed / shadow tint */
+  --fd-shield-bg:   #0a1f3c;   /* navy used behind the shield in marketing */
+
+  /* Semantic accents (mapped onto the brand) */
+  --primary:     var(--fd-blue);
+  --primary-bg:  rgba(20,147,255,.12);
+  --primary-hi:  rgba(20,147,255,.22);
+  --success:     #2dd47b;
+  --warning:     #ffb020;
+  --error:       #ff5252;
+  --pulsar:      #a371f7;       /* Apache Pulsar accent (untouched) */
+  --kafka:       #f0883e;       /* Apache Kafka accent (untouched) */
+
+  /* States */
+  --hover:       rgba(255,255,255,.04);
+
+  /* Effects */
+  --shadow:      0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:   0 4px 12px rgba(0,0,0,.35);
+  --shadow-lg:   0 8px 24px rgba(0,0,0,.5);
+  --shadow-blue: 0 4px 14px rgba(20,147,255,.30);
+
+  /* Sizing */
+  --nav-h:       54px;
+}
+
+html, body { height: 100%; }
+body {
+  /* Inter (FanDuel uses a custom Proxima-Nova-adjacent display face; Inter
+     is the closest open-source match and looks identical at UI sizes). */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss03';   /* Inter's nicer 'a' and digit shapes */
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+code, pre {
+  font-family: 'JetBrains Mono','SF Mono','Fira Code','Menlo',monospace;
+}
+
+/* ── Navbar (shared across pages) ───────────────────────── */
+#navbar {
+  height: var(--nav-h);
+  background: linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 18px; gap: 22px;
+  flex-shrink: 0; position: relative; z-index: 50;
+}
+
+/* Thin FanDuel-blue rule under the navbar — a subtle brand-cue accent. */
+#navbar::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: linear-gradient(90deg, var(--fd-blue) 0%, var(--fd-blue-bright) 50%, var(--fd-blue) 100%);
+  opacity: .65; pointer-events: none;
+}
+
+.navbar-brand {
+  display: flex; align-items: center; gap: 11px;
+  text-decoration: none; color: var(--text);
+  flex-shrink: 0;
+}
+/* Brand icon hosts the FanDuel shield <img> on the FanDuel-blue tile. */
+.brand-icon {
+  width: 34px; height: 34px;
+  background: var(--fd-blue);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  box-shadow: var(--shadow-blue);
+  flex-shrink: 0;
+}
+.brand-icon img { width: 22px; height: 22px; display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
+.brand-icon svg { width: 18px; height: 18px; color: #fff; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name {
+  font-size: 14px; font-weight: 700; letter-spacing: -.01em;
+  display: inline-flex; align-items: baseline; gap: 6px;
+}
+.brand-name .brand-product { color: var(--text-muted); font-weight: 500; }
+.brand-sub  { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; letter-spacing: .02em; }
+
+.navbar-links {
+  display: flex; gap: 2px;
+  background: var(--bg-elev-2);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.navbar-links a {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px; border-radius: 5px;
+  font-size: 12.5px; font-weight: 500;
+  color: var(--text-muted);
+  transition: all .12s;
+  white-space: nowrap;
+}
+.navbar-links a:hover { color: var(--text); background: var(--hover); }
+.navbar-links a.active {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(20,147,255,.30);
+}
+.navbar-links a.active svg { color: var(--fd-blue-bright); }
+.navbar-links a svg { width: 14px; height: 14px; }
+
+.navbar-spacer { flex: 1; }
+.navbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.nav-meta {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 14px;
+  font-size: 11px; color: var(--text-muted);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  font-family: 'SF Mono','Fira Code',monospace;
+  max-width: 320px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nav-meta svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+/* ── Badges ─────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid; flex-shrink: 0;
+  letter-spacing: .02em;
+}
+.badge svg { width: 11px; height: 11px; }
+.badge-stg  { border-color: var(--warning); color: var(--warning); background: rgba(210,153,34,.10); }
+.badge-prd  { border-color: var(--success); color: var(--success); background: rgba(63,185,80,.10); }
+.badge-none { border-color: var(--border);  color: var(--text-muted); background: transparent; }
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 7px 13px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; color: var(--text);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .12s; white-space: nowrap;
+  font-family: inherit;
+}
+.btn:hover:not(:disabled)     { background: var(--hover); border-color: var(--border-strong); }
+.btn:disabled                  { opacity: .4; cursor: not-allowed; }
+.btn svg                       { width: 13px; height: 13px; flex-shrink: 0; }
+
+.btn-primary   {
+  background: var(--fd-blue); border-color: var(--fd-blue); color: #fff;
+  font-weight: 600; box-shadow: var(--shadow-blue);
+}
+.btn-primary:hover:not(:disabled)   { background: var(--fd-blue-bright); border-color: var(--fd-blue-bright); }
+.btn-primary:active:not(:disabled)  { background: var(--fd-blue-deep); border-color: var(--fd-blue-deep); }
+.btn-success   { border-color: var(--success); color: var(--success); }
+.btn-success:hover:not(:disabled)   { background: rgba(45,212,123,.10); }
+.btn-danger    { border-color: var(--error); color: var(--error); }
+.btn-danger:hover:not(:disabled)    { background: rgba(255,82,82,.10); }
+.btn-ghost     { border-color: transparent; color: var(--text-muted); }
+.btn-ghost:hover:not(:disabled)     { background: var(--hover); border-color: var(--border); color: var(--text); }
+.btn-sm        { padding: 4px 9px; font-size: 11px; }
+
+/* ── Scrollbars (Webkit) ────────────────────────────────── */
+*::-webkit-scrollbar             { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track       { background: transparent; }
+*::-webkit-scrollbar-thumb       { background: var(--border); border-radius: 5px; border: 2px solid var(--bg); }
+*::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* ── Selection ──────────────────────────────────────────── */
+::selection { background: rgba(20,147,255,.32); color: #fff; }

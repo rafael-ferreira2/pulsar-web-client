@@ -1,0 +1,2605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FanDuel · GCD Streaming · Compare</title>
+  <meta name="theme-color" content="#1493FF">
+  <meta name="description" content="FanDuel internal — side-by-side comparison of Pulsar and Kafka topics.">
+  <link rel="icon" type="image/png" sizes="any" href="/fanduel-shield.png">
+  <link rel="apple-touch-icon" href="/fanduel-shield.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/shared.css">
+  <style>
+    :root {
+      --diff-equal:    rgba(63,185,80,.10);
+      --diff-equal-fg: #56d364;
+      --diff-diff:     rgba(210,153,34,.14);
+      --diff-diff-fg:  #e3b341;
+      --diff-onlyA:    rgba(163,113,247,.14);
+      --diff-onlyA-fg: #c297ff;
+      --diff-onlyB:    rgba(240,136,62,.14);
+      --diff-onlyB-fg: #ffa57a;
+      --diff-match:    rgba(63,185,80,.10);
+      --diff-match-fg: #56d364;
+      --diff-typediff: rgba(248,81,73,.14);
+      --diff-typediff-fg: #ff7b72;
+    }
+
+    body { display: flex; flex-direction: column; }
+
+    /* ── Source panels (top row) ── */
+    #sources {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+    .source {
+      background: var(--bg-elev); padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .source-head {
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .source-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 11px; border-radius: 999px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+      border: 1px solid;
+    }
+    .source-tag svg { width: 11px; height: 11px; }
+    .source-tag.a { color: var(--pulsar); border-color: var(--pulsar); background: rgba(163,113,247,.10); }
+    .source-tag.b { color: var(--kafka);  border-color: var(--kafka);  background: rgba(240,136,62,.10); }
+    .source-bus-label {
+      font-size: 12px; font-weight: 600; color: var(--text);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .source-bus-label svg { width: 13px; height: 13px; }
+    .source-head .spacer { flex: 1; }
+    .source-state {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10.5px; color: var(--text-muted);
+      padding: 3px 9px; border-radius: 10px;
+      background: var(--bg-elev-2); border: 1px solid var(--border);
+    }
+    .source-state svg { width: 10px; height: 10px; }
+    .source-state.ok   svg { color: var(--success); }
+    .source-state.bad  svg { color: var(--error); }
+    .source-state.bad  { color: var(--error); border-color: rgba(248,81,73,.4); background: rgba(248,81,73,.06); }
+
+    .source-grid {
+      display: grid; grid-template-columns: 80px 1fr;
+      gap: 7px 12px; align-items: center;
+    }
+    .source-grid label {
+      font-size: 10.5px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+      text-align: right;
+    }
+    .ctrl-input, .ctrl-select {
+      background: var(--bg-elev-2); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 6px;
+      font-size: 12px; font-family: 'SF Mono','Fira Code',monospace;
+      width: 100%;
+    }
+    .ctrl-select { font-family: inherit; cursor: pointer; }
+    .ctrl-input:focus, .ctrl-select:focus { outline: none; border-color: var(--primary); }
+
+    .topic-desc {
+      font-size: 11.5px; color: var(--text-muted);
+      line-height: 1.6;
+      padding: 8px 12px; margin-left: 92px;
+      background: var(--bg); border-radius: 5px;
+      border-left: 3px solid var(--border);
+    }
+    #source-a .topic-desc { border-left-color: var(--pulsar); }
+    #source-b .topic-desc { border-left-color: var(--kafka); }
+    .topic-desc code {
+      font-family: 'SF Mono','Fira Code',monospace;
+      background: var(--bg-elev); padding: 1px 6px; border-radius: 3px;
+      color: var(--text); font-size: 11px;
+    }
+    .topic-desc:empty { display: none; }
+
+    /* ── Export dropdown menu ── */
+    .export-menu { position: relative; display: inline-block; }
+    .export-menu-items {
+      position: absolute; top: calc(100% + 4px); right: 0;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 4px; min-width: 250px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.5);
+      z-index: 100;
+      display: none;
+    }
+    .export-menu.open .export-menu-items { display: block; }
+    .export-menu-items button {
+      display: block; width: 100%; text-align: left;
+      background: transparent; border: none;
+      padding: 8px 12px; cursor: pointer;
+      color: var(--text); font-size: 12px; font-weight: 500;
+      border-radius: 5px; font-family: inherit;
+      transition: background .1s;
+    }
+    .export-menu-items button:hover { background: var(--primary-bg); }
+    .export-menu-items button .menu-label {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .export-menu-items button .menu-desc {
+      display: block; color: var(--muted); font-size: 10.5px;
+      margin-top: 3px; line-height: 1.4; font-weight: 400;
+    }
+
+    /* ── Controls bar ── */
+    #controls {
+      background: var(--bg-elev-2); border-bottom: 1px solid var(--border);
+      padding: 10px 18px; display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0; flex-wrap: wrap;
+    }
+    #controls label {
+      font-size: 10.5px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    #controls label svg { width: 12px; height: 12px; }
+    #key-input {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 6px;
+      font-size: 12px; font-family: 'SF Mono','Fira Code',monospace;
+      width: 280px;
+    }
+    #key-input:focus { outline: none; border-color: var(--primary); }
+    .spacer { flex: 1; }
+
+    /* ── Stats strip ── */
+    #stats {
+      background: var(--bg-elev); border-bottom: 1px solid var(--border);
+      padding: 10px 18px; display: flex; gap: 22px; align-items: center;
+      flex-shrink: 0; font-size: 11.5px; flex-wrap: wrap;
+    }
+    .stat { display: inline-flex; align-items: center; gap: 7px; }
+    .stat .num {
+      font-family: 'SF Mono','Fira Code',monospace; font-weight: 700;
+      color: var(--text); font-size: 12.5px;
+    }
+    .stat .lbl {
+      color: var(--text-dim); font-size: 10.5px;
+      text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+    }
+    .stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .stat-dot.a    { background: var(--pulsar); }
+    .stat-dot.b    { background: var(--kafka);  }
+    .stat-dot.live { background: var(--success); animation: blink 1.4s infinite; box-shadow: 0 0 6px rgba(63,185,80,.55); }
+    .stat-dot.idle { background: var(--border-strong); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    /* ── Tabs ── */
+    #tabs {
+      display: flex; padding: 0 18px;
+      background: var(--bg-elev-2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tab {
+      padding: 11px 16px; font-size: 12.5px; cursor: pointer;
+      border-bottom: 2px solid transparent; color: var(--text-muted);
+      transition: all .12s; user-select: none;
+      display: inline-flex; align-items: center; gap: 7px;
+      font-weight: 500;
+    }
+    .tab svg { width: 13px; height: 13px; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .tab-pill {
+      display: inline-block; background: var(--primary); color: #000;
+      border-radius: 10px; padding: 0 6px; font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* ── Panels ── */
+    #panels { flex: 1; overflow: hidden; display: flex; }
+    .panel { flex: 1; overflow-y: auto; display: none; padding: 14px 16px; }
+    .panel.active { display: block; }
+
+    /* ── Mode segmented control ── */
+    .mode-bar {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .seg-group {
+      display: inline-flex; padding: 3px; gap: 2px;
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .seg {
+      padding: 7px 14px; font-size: 12px; font-weight: 600;
+      background: transparent; border: none; cursor: pointer;
+      color: var(--text-muted); border-radius: 6px;
+      font-family: inherit; transition: all .12s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .seg svg { width: 14px; height: 14px; }
+    .seg:hover { color: var(--text); }
+    .seg.active {
+      background: var(--primary); color: #000;
+    }
+    .mode-hint {
+      font-size: 12px; color: var(--text-muted); line-height: 1.55;
+      flex: 1; min-width: 240px;
+    }
+    .mode-hint strong { color: var(--text); }
+    .mode-hint code {
+      font-family: 'SF Mono','Fira Code',monospace;
+      background: var(--bg-elev); padding: 1px 6px; border-radius: 3px;
+      color: var(--text); font-size: 11px;
+    }
+
+    /* ── Schema match score ── */
+    .schema-score {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
+      display: grid; grid-template-columns: 1fr auto; gap: 4px 16px;
+      align-items: center;
+    }
+    .score-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+    .score-value { font-size: 26px; font-weight: 700; font-family: 'SF Mono','Fira Code',monospace; line-height: 1.1; }
+    .score-value.good  { color: var(--success); }
+    .score-value.mid   { color: var(--warning); }
+    .score-value.bad   { color: var(--error); }
+    .score-meta { font-size: 12px; color: var(--text-muted); grid-column: 1 / -1; line-height: 1.5; }
+    .score-bar  {
+      grid-column: 1 / -1; height: 8px;
+      background: var(--bg-elev-2); border-radius: 4px; overflow: hidden;
+    }
+    .score-fill {
+      height: 100%; transition: width .3s ease, background .3s ease;
+      background: linear-gradient(90deg, var(--error) 0%, var(--warning) 50%, var(--success) 100%);
+      background-size: 200% 100%;
+    }
+
+    /* ── Diff renderer ── */
+    .diff-summary {
+      display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .pill {
+      padding: 3px 10px; border-radius: 12px; font-size: 11px;
+      font-family: 'SF Mono','Fira Code',monospace; font-weight: 600;
+    }
+    .pill.equal    { background: var(--diff-equal);    color: var(--diff-equal-fg); }
+    .pill.diff     { background: var(--diff-diff);     color: var(--diff-diff-fg); }
+    .pill.match    { background: var(--diff-match);    color: var(--diff-match-fg); }
+    .pill.typediff { background: var(--diff-typediff); color: var(--diff-typediff-fg); }
+    .pill.onlyA    { background: var(--diff-onlyA);    color: var(--diff-onlyA-fg); }
+    .pill.onlyB    { background: var(--diff-onlyB);    color: var(--diff-onlyB-fg); }
+
+    .diff-table {
+      width: 100%; border-collapse: collapse;
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 11.5px;
+    }
+    .diff-table th {
+      text-align: left; padding: 6px 10px;
+      background: var(--panel); color: var(--muted);
+      font-weight: 600; font-size: 10.5px;
+      text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 1;
+    }
+    .diff-table td {
+      padding: 5px 10px; vertical-align: top;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      word-break: break-all;
+    }
+    .diff-table tr.equal    td { background: rgba(63,185,80,.02); }
+    .diff-table tr.match    td { background: rgba(63,185,80,.05); }
+    .diff-table tr.diff     td { background: rgba(210,153,34,.08); }
+    .diff-table tr.typediff td { background: rgba(248,81,73,.10); }
+    .diff-table tr.onlyA    td { background: rgba(163,113,247,.07); }
+    .diff-table tr.onlyB    td { background: rgba(240,136,62,.07); }
+    .diff-table tr:hover td { filter: brightness(1.4); }
+    .diff-table .path { color: var(--muted); font-weight: 500; min-width: 220px; max-width: 360px; }
+    .diff-table .val-a, .diff-table .val-b { color: var(--text); }
+    .diff-table tr.equal .val-a, .diff-table tr.equal .val-b,
+    .diff-table tr.match .val-a, .diff-table tr.match .val-b { color: var(--diff-match-fg); }
+    .diff-table tr.diff  .val-a, .diff-table tr.diff  .val-b { color: var(--diff-diff-fg); }
+    .diff-table tr.typediff .val-a, .diff-table tr.typediff .val-b { color: var(--diff-typediff-fg); }
+    .diff-table tr.onlyA .val-a { color: var(--diff-onlyA-fg); }
+    .diff-table tr.onlyA .val-b { color: var(--muted); font-style: italic; }
+    .diff-table tr.onlyB .val-b { color: var(--diff-onlyB-fg); }
+    .diff-table tr.onlyB .val-a { color: var(--muted); font-style: italic; }
+    .diff-table .badge-status {
+      display: inline-block; padding: 1px 7px; border-radius: 8px;
+      font-size: 10px; font-weight: 700; letter-spacing: .03em;
+      white-space: nowrap;
+    }
+    .diff-table tr.match    .badge-status { background: var(--diff-match);    color: var(--diff-match-fg); }
+    .diff-table tr.equal    .badge-status { background: var(--diff-match);    color: var(--diff-match-fg); }
+    .diff-table tr.diff     .badge-status { background: var(--diff-diff);     color: var(--diff-diff-fg); }
+    .diff-table tr.typediff .badge-status { background: var(--diff-typediff); color: var(--diff-typediff-fg); }
+    .diff-table tr.onlyA    .badge-status { background: var(--diff-onlyA);    color: var(--diff-onlyA-fg); }
+    .diff-table tr.onlyB    .badge-status { background: var(--diff-onlyB);    color: var(--diff-onlyB-fg); }
+    .type-tag {
+      display: inline-block; padding: 1px 6px; border-radius: 4px;
+      font-size: 10.5px; font-weight: 600;
+      background: var(--panel2); color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .diff-filter {
+      display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
+      align-items: center;
+    }
+    .diff-filter .filter-label {
+      font-size: 11px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .05em; margin-right: 4px;
+    }
+    .chip {
+      padding: 4px 10px; border-radius: 16px;
+      border: 1px solid var(--border);
+      font-size: 11px; cursor: pointer; user-select: none;
+      transition: all .12s; background: transparent; color: var(--muted);
+      font-family: inherit;
+    }
+    .chip:hover { color: var(--text); }
+    .chip.on    { color: var(--text); border-color: var(--primary); background: var(--primary-bg); }
+
+    /* ── Snapshot (latest message) view ── */
+    .snap-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border); margin-bottom: 14px;
+      border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    }
+    .snap {
+      background: var(--bg-elev); padding: 12px 14px;
+      max-height: 360px; overflow: auto;
+    }
+    .snap-head {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .snap pre {
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 11px;
+      line-height: 1.6; white-space: pre; overflow-x: auto;
+      color: var(--text);
+    }
+
+    /* ── Matched pairs list ── */
+    .pair {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+      transition: border-color .12s;
+    }
+    .pair:hover { border-color: var(--border-strong); }
+    .pair-head {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 12px;
+      margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .pair-head .key { color: var(--primary); font-weight: 700; }
+    .pair-head .meta { color: var(--text-muted); font-size: 11px; font-family: inherit; }
+    .pair-body { display: none; }
+    .pair.open .pair-body { display: block; }
+    .pair-toggle {
+      margin-left: auto; background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 4px 11px; border-radius: 6px;
+      font-size: 11px; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .pair-toggle svg { width: 11px; height: 11px; }
+    .pair-toggle:hover { color: var(--text); border-color: var(--border-strong); }
+
+    /* ── Stream view ── */
+    .stream-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border); height: 100%;
+    }
+    .stream-col {
+      background: var(--bg-elev); display: flex; flex-direction: column;
+      overflow: hidden; min-height: 0;
+    }
+    .stream-col-head {
+      padding: 10px 14px; background: var(--bg-elev-2);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .05em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stream-col-body {
+      flex: 1; overflow-y: auto; padding: 10px;
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 11px;
+      line-height: 1.55;
+    }
+    .msg {
+      background: var(--bg-elev-2); border-radius: 7px;
+      padding: 9px 11px; margin-bottom: 7px;
+      white-space: pre-wrap; word-break: break-all;
+      border: 1px solid transparent;
+    }
+    .msg:hover { border-color: var(--border); }
+    .msg .ts { color: var(--text-muted); font-size: 10px; margin-top: 4px; }
+    .msg .meta { color: var(--text-muted); font-size: 10px; margin-bottom: 4px; }
+
+    .empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; flex: 1; gap: 14px;
+      color: var(--text-muted); text-align: center; padding: 48px 24px;
+    }
+    .empty-icon {
+      width: 60px; height: 60px;
+      color: var(--border-strong); opacity: .65;
+    }
+    .empty-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .empty-sub { font-size: 12.5px; max-width: 420px; line-height: 1.65; }
+    .empty-sub code, .empty-sub strong {
+      font-family: 'SF Mono','Fira Code',monospace;
+      background: var(--bg-elev); padding: 1px 6px; border-radius: 3px;
+      color: var(--text); font-size: 11px; font-weight: 600;
+    }
+
+    /* ── Line diff (VSCode-style side-by-side) ── */
+    #panel-linediff { padding: 0 !important; }
+    #panel-linediff.active { display: flex !important; flex-direction: column; }
+    .linediff-toolbar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 10px 16px;
+      background: var(--panel2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .linediff-toolbar label {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+    .linediff-toolbar select {
+      background: var(--panel); color: var(--text);
+      border: 1px solid var(--border); border-radius: 5px;
+      padding: 5px 9px; font-size: 12px;
+      font-family: 'SF Mono','Fira Code',monospace;
+      max-width: 360px; min-width: 180px;
+    }
+    .linediff-toolbar select:focus { outline: none; border-color: var(--primary); }
+    .linediff-toolbar select.linediff-pick-a { border-color: var(--pulsar); }
+    .linediff-toolbar select.linediff-pick-b { border-color: var(--kafka); }
+    .linediff-summary {
+      padding: 8px 16px; font-size: 11.5px; color: var(--muted);
+      background: var(--panel); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .linediff-summary strong { color: var(--text); font-family: 'SF Mono','Fira Code',monospace; }
+    .linediff-scroll {
+      flex: 1; overflow: auto; background: var(--bg);
+      min-height: 0;
+    }
+    .linediff-rows {
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 11.5px;
+      line-height: 1.55; min-width: max-content;
+    }
+    .linediff-row {
+      display: grid;
+      grid-template-columns: 46px minmax(280px, 1fr) 46px minmax(280px, 1fr);
+      border-bottom: 1px solid rgba(255,255,255,.025);
+    }
+    .linediff-row .num {
+      text-align: right; padding: 1px 8px;
+      background: var(--panel2); color: var(--muted);
+      font-size: 10.5px; user-select: none;
+      border-right: 1px solid var(--border);
+    }
+    .linediff-row .line {
+      padding: 1px 12px; white-space: pre;
+      overflow: visible; min-width: 0;
+      color: var(--text);
+    }
+    .linediff-row .line.empty {
+      background-image:
+        repeating-linear-gradient(135deg,
+          rgba(255,255,255,.02) 0,
+          rgba(255,255,255,.02) 8px,
+          transparent 8px,
+          transparent 16px);
+    }
+    /* deleted on A side */
+    .linediff-row.del .line.left,
+    .linediff-row.mod .line.left  { background: rgba(248,81,73,.13); }
+    .linediff-row.del .num.left,
+    .linediff-row.mod .num.left   { background: rgba(248,81,73,.22); color: #ffb4b4; }
+    /* added on B side */
+    .linediff-row.add .line.right,
+    .linediff-row.mod .line.right { background: rgba(63,185,80,.13); }
+    .linediff-row.add .num.right,
+    .linediff-row.mod .num.right  { background: rgba(63,185,80,.22); color: #b3eab9; }
+    /* equal — no highlight */
+    .linediff-legend {
+      display: inline-flex; gap: 10px; margin-left: auto; font-size: 10.5px;
+      flex-wrap: wrap;
+    }
+    .linediff-legend .sw {
+      display: inline-flex; align-items: center; gap: 5px;
+      color: var(--muted);
+    }
+    .linediff-legend .sw::before {
+      content: ''; width: 10px; height: 10px;
+      display: inline-block; border-radius: 2px;
+    }
+    .linediff-legend .sw.eq::before  { background: var(--panel2); border: 1px solid var(--border); }
+    .linediff-legend .sw.mod::before { background: linear-gradient(90deg, rgba(248,81,73,.4) 0%, rgba(248,81,73,.4) 50%, rgba(63,185,80,.4) 50%, rgba(63,185,80,.4) 100%); }
+    .linediff-legend .sw.del::before { background: rgba(248,81,73,.4); }
+    .linediff-legend .sw.add::before { background: rgba(63,185,80,.4); }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav id="navbar">
+  <a href="/" class="navbar-brand" title="FanDuel — GCD Streaming Diagnostics">
+    <div class="brand-icon" id="brand-icon">
+      <img src="/fanduel-shield.png" alt="FanDuel" width="22" height="22">
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">FanDuel <span class="brand-product">· GCD Streaming</span></span>
+      <span class="brand-sub">Pulsar · Kafka diagnostics</span>
+    </div>
+  </a>
+  <div class="navbar-links">
+    <a href="/" id="nav-listener"></a>
+    <a href="/compare.html" class="active" id="nav-compare"></a>
+  </div>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-right">
+    <div class="nav-meta" id="nav-context"></div>
+  </div>
+</nav>
+
+<!-- ═══ Source selectors ═══ -->
+<div id="sources">
+  <div class="source" id="source-a">
+    <div class="source-head">
+      <span class="source-tag a">A</span>
+      <span class="source-bus-label" id="head-a-bus"></span>
+      <span class="spacer"></span>
+      <span class="source-state" id="state-a"></span>
+    </div>
+    <div class="source-grid">
+      <label>Bus</label>
+      <select class="ctrl-select" id="bus-a" onchange="onBusChange('a')">
+        <option value="pulsar" selected>Pulsar</option>
+        <option value="kafka">Kafka</option>
+      </select>
+      <label>Environment</label>
+      <select class="ctrl-select" id="env-a" onchange="onEnvChange('a')"></select>
+      <label>Topic</label>
+      <select class="ctrl-select" id="topic-a" onchange="onTopicChange('a')"></select>
+      <label>Sub / group</label>
+      <input class="ctrl-input" id="sub-a" placeholder="compare-yourname-a" />
+      <label>Position</label>
+      <select class="ctrl-select" id="pos-a">
+        <option value="Latest" selected>Latest</option>
+        <option value="Earliest">Earliest</option>
+      </select>
+    </div>
+    <div class="topic-desc" id="desc-a"></div>
+  </div>
+
+  <div class="source" id="source-b">
+    <div class="source-head">
+      <span class="source-tag b">B</span>
+      <span class="source-bus-label" id="head-b-bus"></span>
+      <span class="spacer"></span>
+      <span class="source-state" id="state-b"></span>
+    </div>
+    <div class="source-grid">
+      <label>Bus</label>
+      <select class="ctrl-select" id="bus-b" onchange="onBusChange('b')">
+        <option value="pulsar">Pulsar</option>
+        <option value="kafka" selected>Kafka</option>
+      </select>
+      <label>Environment</label>
+      <select class="ctrl-select" id="env-b" onchange="onEnvChange('b')"></select>
+      <label>Topic</label>
+      <select class="ctrl-select" id="topic-b" onchange="onTopicChange('b')"></select>
+      <label>Sub / group</label>
+      <input class="ctrl-input" id="sub-b" placeholder="compare-yourname-b" />
+      <label>Position</label>
+      <select class="ctrl-select" id="pos-b">
+        <option value="Latest" selected>Latest</option>
+        <option value="Earliest">Earliest</option>
+      </select>
+    </div>
+    <div class="topic-desc" id="desc-b"></div>
+  </div>
+</div>
+
+<!-- ═══ Controls ═══ -->
+<div id="controls">
+  <label for="key-input" id="ctrl-lbl-key"></label>
+  <input id="key-input" placeholder="auto · meta.gameStateId" />
+  <label for="cap-input" id="ctrl-lbl-cap"></label>
+  <select id="cap-input" class="ctrl-select" style="width:110px">
+    <option value="0">∞ Unlimited</option>
+    <option value="10">10 msgs</option>
+    <option value="25">25 msgs</option>
+    <option value="50" selected>50 msgs</option>
+    <option value="100">100 msgs</option>
+    <option value="250">250 msgs</option>
+  </select>
+  <div class="spacer"></div>
+  <button class="btn btn-success" id="start-btn" onclick="startCompare()"></button>
+  <button class="btn btn-danger"  id="stop-btn"  onclick="stopCompare()" disabled></button>
+  <button class="btn btn-ghost"   onclick="resetAll()" id="reset-btn"></button>
+  <div class="export-menu" id="export-menu">
+    <button class="btn btn-ghost" onclick="toggleExportMenu(event)" title="Export current comparison" id="export-trigger"></button>
+    <div class="export-menu-items">
+      <button onclick="exportJson()" title="Full machine-readable export">
+        <span class="menu-label" id="exp-json-label"></span>
+        <span class="menu-desc">Complete export: sources, schema/values/both diffs for latest, all matched pairs, and both raw streams.</span>
+      </button>
+      <button onclick="exportCsv()" title="Flat diff table for spreadsheets">
+        <span class="menu-label" id="exp-csv-label"></span>
+        <span class="menu-desc">One row per field path — section, path, status, types, values. Opens cleanly in Excel / Google Sheets / Numbers.</span>
+      </button>
+      <button onclick="exportReport()" title="Detailed Markdown report">
+        <span class="menu-label" id="exp-md-label"></span>
+        <span class="menu-desc">Human-readable .md: sources, schema match score, structure & value diffs (categorized), matched pairs, JSON snapshots, plus an appendix with the full JSON.</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Stats strip ═══ -->
+<div id="stats">
+  <span class="stat">
+    <span class="stat-dot idle" id="dot-a"></span>
+    <span class="lbl">A</span>
+    <span class="num" id="cnt-a">0</span>
+    <span style="color:var(--text-muted);font-size:11px" id="lbl-a">—</span>
+  </span>
+  <span class="stat">
+    <span class="stat-dot idle" id="dot-b"></span>
+    <span class="lbl">B</span>
+    <span class="num" id="cnt-b">0</span>
+    <span style="color:var(--text-muted);font-size:11px" id="lbl-b">—</span>
+  </span>
+  <span class="stat">
+    <span class="lbl">Pairs</span>
+    <span class="num" id="cnt-pairs">0</span>
+  </span>
+  <span class="stat">
+    <span class="lbl">Key</span>
+    <span class="num" id="cnt-key">—</span>
+  </span>
+  <div class="spacer" style="flex:1"></div>
+  <span class="stat">
+    <span class="lbl">Last update</span>
+    <span class="num" id="cnt-time">—</span>
+  </span>
+</div>
+
+<!-- ═══ Tabs ═══ -->
+<div id="tabs">
+  <div class="tab active" data-tab="diff"     onclick="switchTab('diff')"     id="tab-diff"></div>
+  <div class="tab"        data-tab="pairs"    onclick="switchTab('pairs')"    id="tab-pairs"></div>
+  <div class="tab"        data-tab="linediff" onclick="switchTab('linediff')" id="tab-linediff"></div>
+  <div class="tab"        data-tab="stream"   onclick="switchTab('stream')"   id="tab-stream"></div>
+</div>
+
+<!-- ═══ Panels ═══ -->
+<div id="panels">
+
+  <!-- ── Latest snapshot diff ─────────────────────────── -->
+  <div class="panel active" id="panel-diff">
+    <div id="diff-empty" class="empty">
+      <div class="empty-icon" id="empty-diff-icon"></div>
+      <div class="empty-title">No messages yet</div>
+      <div class="empty-sub">Pick two topics above and press <strong>Start comparison</strong>. The latest decoded message from each side will be flattened into dot paths and diffed here — first by structure (field names and types), then by values.</div>
+    </div>
+
+    <div id="diff-view" style="display:none">
+      <!-- Mode selector -->
+      <div class="mode-bar">
+        <div class="seg-group" role="tablist" aria-label="Comparison mode">
+          <button class="seg active" data-mode="structure" onclick="setMode('structure')" id="seg-structure" title="Compare field names and types only (array indexes normalized to [*])"></button>
+          <button class="seg"        data-mode="values"    onclick="setMode('values')"    id="seg-values"    title="Compare values for fields that exist on both sides"></button>
+          <button class="seg"        data-mode="both"      onclick="setMode('both')"      id="seg-both"      title="Combined: structure + values in one table"></button>
+        </div>
+        <div class="mode-hint" id="mode-hint"></div>
+      </div>
+
+      <!-- Schema match score -->
+      <div class="schema-score" id="schema-score">
+        <div>
+          <div class="score-label">Schema match</div>
+          <div class="score-value" id="score-value">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="score-label">Shared paths</div>
+          <div style="font-family:'SF Mono',monospace;font-size:14px;font-weight:700;color:var(--text)" id="score-shared">— / —</div>
+        </div>
+        <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+        <div class="score-meta" id="score-meta">Awaiting first message on both sides…</div>
+      </div>
+
+      <!-- Snapshots -->
+      <div class="snap-grid">
+        <div class="snap">
+          <div class="snap-head">
+            <span class="source-tag a">A</span>
+            <span id="snap-a-meta">—</span>
+          </div>
+          <pre id="snap-a">{}</pre>
+        </div>
+        <div class="snap">
+          <div class="snap-head">
+            <span class="source-tag b">B</span>
+            <span id="snap-b-meta">—</span>
+          </div>
+          <pre id="snap-b">{}</pre>
+        </div>
+      </div>
+
+      <!-- Summary pills (content varies by mode) -->
+      <div class="diff-summary" id="diff-summary"></div>
+
+      <!-- Filter chips (content varies by mode) -->
+      <div class="diff-filter" id="diff-filter"></div>
+
+      <!-- Diff table (columns vary by mode) -->
+      <table class="diff-table">
+        <thead><tr id="diff-head">
+          <th>Field path</th><th>Source A</th><th>Source B</th><th>Status</th>
+        </tr></thead>
+        <tbody id="diff-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Matched pairs ─────────────────────────────────── -->
+  <div class="panel" id="panel-pairs">
+    <div id="pairs-empty" class="empty">
+      <div class="empty-icon" id="empty-pairs-icon"></div>
+      <div class="empty-title">No matched pairs yet</div>
+      <div class="empty-sub">A pair appears when both sides produce a message sharing the same correlation key. Override the key path above (e.g. <code>fixture.fixtureId</code>) if auto-detection isn't picking it up.</div>
+    </div>
+    <div id="pairs-list"></div>
+  </div>
+
+  <!-- ── Side-by-side line diff (VSCode-style) ─────────── -->
+  <div class="panel" id="panel-linediff">
+    <div class="linediff-toolbar">
+      <label>Message A</label>
+      <select id="linediff-pick-a" class="linediff-pick-a" onchange="renderLineDiff()"></select>
+      <label>Message B</label>
+      <select id="linediff-pick-b" class="linediff-pick-b" onchange="renderLineDiff()"></select>
+      <label>By matched key</label>
+      <select id="linediff-pick-pair" onchange="pickPairForLineDiff()"></select>
+      <button class="btn btn-ghost" onclick="copyUnifiedDiff()" title="Copy as git-style unified diff for sharing" id="btn-copy-unified"></button>
+      <div class="linediff-legend">
+        <span class="sw eq">equal</span>
+        <span class="sw mod">modified</span>
+        <span class="sw del">A only</span>
+        <span class="sw add">B only</span>
+      </div>
+    </div>
+    <div class="linediff-summary" id="linediff-summary">Pick a message on each side (or use the matched-key dropdown) to see a line-by-line diff.</div>
+    <div id="linediff-empty" class="empty" style="display:flex">
+      <div class="empty-icon" id="empty-linediff-icon"></div>
+      <div class="empty-title">No diff to show yet</div>
+      <div class="empty-sub">Start the comparison so messages flow into both sides, then pick one message from A and one from B (or use <strong>By matched key</strong> to pair correlated messages automatically).</div>
+    </div>
+    <div class="linediff-scroll" id="linediff-scroll" style="display:none">
+      <div class="linediff-rows" id="linediff-rows"></div>
+    </div>
+  </div>
+
+  <!-- ── Raw stream ────────────────────────────────────── -->
+  <div class="panel" id="panel-stream" style="padding:0">
+    <div class="stream-grid">
+      <div class="stream-col">
+        <div class="stream-col-head"><span class="source-tag a">A</span> <span id="stream-a-meta">—</span></div>
+        <div class="stream-col-body" id="stream-a"></div>
+      </div>
+      <div class="stream-col">
+        <div class="stream-col-head"><span class="source-tag b">B</span> <span id="stream-b-meta">—</span></div>
+        <div class="stream-col-body" id="stream-b"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/icons.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// Static icon painter
+// ═══════════════════════════════════════════════════════════
+function paintStaticIcons() {
+  // (brand-icon now hosts the FanDuel shield <img> directly — no JS paint needed.)
+  document.getElementById('nav-listener').innerHTML = icon('broadcast', 14) + '<span>Listener</span>';
+  document.getElementById('nav-compare').innerHTML  = icon('compare', 14)   + '<span>Compare</span>';
+  document.getElementById('nav-context').innerHTML  = icon('diff', 11) + ' <span>Side-by-side</span>';
+
+  document.getElementById('ctrl-lbl-key').innerHTML = icon('key', 12) + ' Correlation key';
+  document.getElementById('ctrl-lbl-cap').innerHTML = icon('layers', 12) + ' Cap / side';
+
+  document.getElementById('start-btn').innerHTML  = icon('play', 13)  + ' Start comparison';
+  document.getElementById('stop-btn').innerHTML   = icon('stop', 13)  + ' Stop';
+  document.getElementById('reset-btn').innerHTML  = icon('reset', 13) + ' Reset';
+  document.getElementById('export-trigger').innerHTML = icon('download', 13) + ' Export ' + icon('chevron', 11);
+
+  document.getElementById('exp-json-label').innerHTML = icon('download', 12) + ' JSON (full)';
+  document.getElementById('exp-csv-label').innerHTML  = icon('list', 12)     + ' CSV (diff table)';
+  document.getElementById('exp-md-label').innerHTML   = icon('doc', 12)      + ' Markdown report';
+
+  document.getElementById('tab-diff').innerHTML     = icon('diff', 13)     + ' <span>Latest snapshot diff</span>';
+  document.getElementById('tab-pairs').innerHTML    = icon('link', 13)     + ' <span>Matched pairs</span> <span id="pill-pairs" class="tab-pill" style="display:none">0</span>';
+  document.getElementById('tab-linediff').innerHTML = icon('compare', 13)  + ' <span>Line diff</span>';
+  document.getElementById('tab-stream').innerHTML   = icon('stream', 13)   + ' <span>Stream</span>';
+
+  document.getElementById('seg-structure').innerHTML = icon('layers', 14) + ' Structure';
+  document.getElementById('seg-values').innerHTML    = icon('list',   14) + ' Values';
+  document.getElementById('seg-both').innerHTML      = icon('search', 14) + ' Both';
+
+  document.getElementById('empty-diff-icon').innerHTML     = icon('compare', 60, { stroke: 1.4 });
+  document.getElementById('empty-pairs-icon').innerHTML    = icon('link',    60, { stroke: 1.4 });
+  document.getElementById('empty-linediff-icon').innerHTML = icon('doc',     60, { stroke: 1.4 });
+  document.getElementById('btn-copy-unified').innerHTML    = icon('copy', 12) + ' Copy unified';
+
+  // Source headers — initial state
+  paintSourceHead('a');
+  paintSourceHead('b');
+}
+
+function paintSourceHead(s) {
+  const bus = (side[s]?.bus) || (s === 'a' ? 'pulsar' : 'kafka');
+  const el = document.getElementById('head-' + s + '-bus');
+  if (!el) return;
+  el.innerHTML = icon(bus === 'kafka' ? 'kafka' : 'pulsar', 13) +
+                 ' ' + (bus === 'kafka' ? 'Kafka' : 'Pulsar');
+}
+
+function paintSourceState(s) {
+  const el = document.getElementById('state-' + s);
+  if (!el) return;
+  const t = side[s]?.topic, bus = side[s]?.bus;
+  if (!t) { el.style.display = 'none'; return; }
+  el.style.display = 'inline-flex';
+  let ok, msg;
+  if (bus === 'kafka') {
+    ok = !!t.credentialReady;
+    msg = ok ? 'Cluster ready' : 'Missing credentials';
+  } else {
+    ok = !!t.tokenSet;
+    msg = ok ? 'Token loaded' : 'Token missing';
+  }
+  el.className = 'source-state ' + (ok ? 'ok' : 'bad');
+  el.innerHTML = icon(ok ? 'check' : 'warning', 10) + ' ' + msg;
+  el.title = ok ? msg : (bus === 'kafka' ? 'Set Confluent API key/secret and restart server' : `Set ${t.tokenEnvVar || 'token env var'} and restart server`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════════════
+let pulsarEnvs = [];
+let kafkaEnvs  = [];
+
+const side = {
+  a: { ws: null, running: false, msgs: [], latest: null, env: null, topic: null, bus: 'pulsar' },
+  b: { ws: null, running: false, msgs: [], latest: null, env: null, topic: null, bus: 'kafka' }
+};
+
+const pairsByKey = new Map();          // key → { a: msg, b: msg, ts }
+let activeTab    = 'diff';
+
+// Comparison mode + per-mode filter state
+//   structure : compare field names + types (array indexes normalized to [*])
+//   values    : compare values for paths present on both sides
+//   both      : combined (structure + values in one table)
+let mode = 'structure';
+const filtersByMode = {
+  structure: { match: false, typediff: true, onlyA: true, onlyB: true },
+  values:    { equal: false, diff: true },
+  both:      { match: false, equal: false, diff: true, typediff: true, onlyA: true, onlyB: true }
+};
+const MODE_HINTS = {
+  structure: '<strong>Step 1 — Structure check.</strong> Compares <em>field names and types</em> only. Array indexes are normalized (<code>incidents[0].id</code> and <code>incidents[1].id</code> collapse to <code>incidents[*].id</code>). Use this to verify both buses produce the <strong>same shape</strong>.',
+  values:    '<strong>Step 2 — Value check.</strong> Only fields that exist on both sides are listed. Each row shows the actual values, with mismatches highlighted.',
+  both:      '<strong>Combined view.</strong> Everything in one table: identical values, value differences, type mismatches, and fields only on one side. Use the chips to focus.'
+};
+
+const KEY_CANDIDATES = [
+  'meta.gameStateId',
+  'meta.gameStateMatchId',
+  'fixture.fixtureId',
+  'fixtureId',
+  'gameStateId',
+  'matchId',
+  'id'
+];
+
+// ═══════════════════════════════════════════════════════════
+// Boot
+// ═══════════════════════════════════════════════════════════
+// Paint static icons synchronously, before async fetches.
+paintStaticIcons();
+
+// Deep-link prefill: /compare.html?busA=pulsar&envA=...&topicA=...
+//                                  busB=kafka&envB=...&topicB=...
+// Either side (or neither) may be specified. Side B falls back to the
+// default soccer-gamestate auto-pick when only A is provided.
+function readURLPrefill() {
+  const p = new URLSearchParams(location.search);
+  const out = {};
+  for (const s of ['a', 'b']) {
+    const bus = p.get('bus' + s);
+    if (bus === 'pulsar' || bus === 'kafka') {
+      out[s] = { bus, envId: p.get('env' + s), topicId: p.get('topic' + s) };
+    }
+  }
+  return out;
+}
+
+function applyPrefill(s, conf) {
+  document.getElementById('bus-' + s).value = conf.bus;
+  side[s].bus = conf.bus;
+  fillSide(s);
+  if (conf.envId) {
+    const envSel = document.getElementById('env-' + s);
+    if ([...envSel.options].some((o) => o.value === conf.envId)) {
+      envSel.value = conf.envId;
+      onEnvChange(s);
+    }
+  }
+  if (conf.topicId) {
+    const tSel = document.getElementById('topic-' + s);
+    if ([...tSel.options].some((o) => o.value === conf.topicId)) {
+      tSel.value = conf.topicId;
+      onTopicChange(s);
+    }
+  }
+}
+
+(async function init() {
+  try {
+    pulsarEnvs = await fetch('/api/config').then(r => r.json());
+  } catch { pulsarEnvs = []; }
+  try {
+    kafkaEnvs = await fetch('/api/kafka/config').then(r => r.json());
+  } catch { kafkaEnvs = []; }
+
+  fillSide('a');
+  fillSide('b');
+
+  const pre = readURLPrefill();
+  if (pre.a || pre.b) {
+    // Auto-pick the canonical default on whichever side is NOT pinned by the URL.
+    preferSoccerGamestate();
+    if (pre.a) applyPrefill('a', pre.a);
+    if (pre.b) applyPrefill('b', pre.b);
+  } else {
+    preferSoccerGamestate();
+  }
+})();
+
+function envsFor(bus) { return bus === 'kafka' ? kafkaEnvs : pulsarEnvs; }
+
+function fillSide(s) {
+  const bus  = document.getElementById('bus-' + s).value;
+  side[s].bus = bus;
+  paintSourceHead(s);
+
+  const envSel = document.getElementById('env-' + s);
+  const envs   = envsFor(bus);
+  envSel.innerHTML = envs.map(e => `<option value="${e.id}">${esc(e.name)}</option>`).join('');
+  if (envs.length) {
+    envSel.value = envs[0].id;
+    onEnvChange(s);
+  } else {
+    document.getElementById('topic-' + s).innerHTML = '';
+    side[s].env = side[s].topic = null;
+    paintSourceState(s);
+  }
+}
+
+function preferSoccerGamestate() {
+  function pick(s, bus, topicIdHint) {
+    document.getElementById('bus-' + s).value = bus;
+    side[s].bus = bus;
+    fillSide(s);
+    const envs = envsFor(bus);
+    if (!envs.length) return;
+    const stg = envs.find(e => /stg|staging|nxt/i.test(e.id)) || envs[0];
+    document.getElementById('env-' + s).value = stg.id;
+    onEnvChange(s);
+    const topicSel = document.getElementById('topic-' + s);
+    const t = stg.topics.find(t => t.id === topicIdHint)
+           || stg.topics.find(t => /gamestate|game-state/i.test(t.id + ' ' + t.topic));
+    if (t) {
+      topicSel.value = t.id;
+      onTopicChange(s);
+    }
+  }
+  pick('a', 'pulsar', 'gamestate');
+  pick('b', 'kafka',  'soccer_gamestate');
+  document.getElementById('sub-a').value = 'compare-' + (navigator.userAgent.includes('Mac') ? 'mac' : 'pc') + '-pulsar';
+  document.getElementById('sub-b').value = 'compare-' + (navigator.userAgent.includes('Mac') ? 'mac' : 'pc') + '-kafka';
+}
+
+function onBusChange(s) {
+  if (side[s].running) {
+    alert('Stop the running comparison before switching bus.');
+    document.getElementById('bus-' + s).value = side[s].bus;
+    return;
+  }
+  fillSide(s);
+}
+
+function onEnvChange(s) {
+  const bus    = side[s].bus;
+  const envs   = envsFor(bus);
+  const envId  = document.getElementById('env-' + s).value;
+  const env    = envs.find(e => e.id === envId);
+  side[s].env = env || null;
+
+  const tSel = document.getElementById('topic-' + s);
+  tSel.innerHTML = (env?.topics || []).map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join('');
+  if (env?.topics?.length) {
+    tSel.value = env.topics[0].id;
+    onTopicChange(s);
+  } else {
+    side[s].topic = null;
+    updateCredNote(s);
+  }
+}
+
+function onTopicChange(s) {
+  const env = side[s].env;
+  if (!env) return;
+  const tId = document.getElementById('topic-' + s).value;
+  side[s].topic = env.topics.find(t => t.id === tId) || null;
+  updateCredNote(s);
+  updateDescription(s);
+  updateLabels();
+}
+
+function updateDescription(s) {
+  const el = document.getElementById('desc-' + s);
+  const t  = side[s].topic;
+  el.innerHTML = (t && t.description) ? renderDescription(t.description) : '';
+}
+
+function renderDescription(text) {
+  if (!text) return '';
+  return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+function updateCredNote(s) {
+  paintSourceState(s);
+}
+
+function updateLabels() {
+  for (const s of ['a','b']) {
+    const env = side[s].env, t = side[s].topic;
+    const txt = env && t ? `${side[s].bus} · ${env.id} · ${t.topic}` : '—';
+    document.getElementById('lbl-' + s).textContent     = txt;
+    document.getElementById('stream-' + s + '-meta').textContent = txt;
+    document.getElementById('snap-' + s + '-meta').textContent   = txt;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Start / stop
+// ═══════════════════════════════════════════════════════════
+function startCompare() {
+  for (const s of ['a','b']) {
+    if (!side[s].env || !side[s].topic) {
+      alert(`Pick env + topic for source ${s.toUpperCase()} first.`);
+      return;
+    }
+    if (side[s].bus === 'kafka' && !side[s].topic.credentialReady) {
+      alert(`Source ${s.toUpperCase()}: Kafka credentials not loaded. Update tokens.sh and restart the server.`);
+      return;
+    }
+    if (side[s].bus === 'pulsar' && !side[s].topic.tokenSet) {
+      alert(`Source ${s.toUpperCase()}: Pulsar token not set (${side[s].topic.tokenEnvVar}).`);
+      return;
+    }
+    const sub = document.getElementById('sub-' + s).value.trim();
+    if (!sub) {
+      alert(`Source ${s.toUpperCase()}: enter a subscription name / consumer group id.`);
+      document.getElementById('sub-' + s).focus();
+      return;
+    }
+  }
+
+  for (const s of ['a','b']) openConsumer(s);
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('stop-btn').disabled  = false;
+}
+
+function openConsumer(s) {
+  closeConsumer(s);
+  const st = side[s];
+  st.msgs = [];
+  st.latest = null;
+  document.getElementById('cnt-' + s).textContent = '0';
+  document.getElementById('stream-' + s).innerHTML = '';
+
+  const ws = new WebSocket('ws://' + location.host);
+  st.ws = ws;
+  st.running = true;
+  setDot(s, 'live');
+
+  ws.onopen = () => {
+    const sub = document.getElementById('sub-' + s).value.trim();
+    const cap = parseInt(document.getElementById('cap-input').value, 10) || 0;
+    const base = {
+      action: 'start-consume',
+      envId:  st.env.id,
+      topicId: st.topic.id,
+      subscriptionName:     sub,
+      subscriptionPosition: document.getElementById('pos-' + s).value,
+      count: cap
+    };
+    if (st.bus === 'kafka') {
+      base.transport = 'kafka';
+    } else {
+      base.subscriptionType = 'Shared';
+    }
+    ws.send(JSON.stringify(base));
+  };
+
+  ws.onmessage = (e) => {
+    let d; try { d = JSON.parse(e.data); } catch { return; }
+    handleMsg(s, d);
+  };
+  ws.onerror = () => handleMsg(s, { type: 'error', message: 'WebSocket error' });
+  ws.onclose = () => {
+    if (!st.running) return;
+    st.running = false;
+    setDot(s, 'idle');
+    appendStream(s, '<div class="msg"><span class="meta" style="color:var(--muted)">⚡ Connection closed.</span></div>');
+    if (!side.a.running && !side.b.running) {
+      document.getElementById('start-btn').disabled = false;
+      document.getElementById('stop-btn').disabled  = true;
+    }
+  };
+}
+
+function closeConsumer(s) {
+  const st = side[s];
+  if (st.ws) {
+    try { st.ws.send(JSON.stringify({ action: 'stop-consume' })); } catch {}
+    try { st.ws.close(); } catch {}
+  }
+  st.ws = null;
+  st.running = false;
+  setDot(s, 'idle');
+}
+
+function stopCompare() {
+  for (const s of ['a','b']) closeConsumer(s);
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('stop-btn').disabled  = true;
+}
+
+function resetAll() {
+  stopCompare();
+  for (const s of ['a','b']) {
+    side[s].msgs = [];
+    side[s].latest = null;
+    document.getElementById('cnt-' + s).textContent = '0';
+    document.getElementById('stream-' + s).innerHTML = '';
+  }
+  pairsByKey.clear();
+  document.getElementById('cnt-pairs').textContent = '0';
+  document.getElementById('cnt-key').textContent   = '—';
+  document.getElementById('cnt-time').textContent  = '—';
+  lineDiffPick.a = 'latest'; lineDiffPick.b = 'latest'; lineDiffPick.pair = '';
+  renderDiff();
+  renderPairs();
+  updatePairPill();
+  populateLineDiffPickers();
+  renderLineDiff();
+}
+
+function setDot(s, kind) {
+  const el = document.getElementById('dot-' + s);
+  el.className = 'stat-dot ' + (kind === 'live' ? 'live' : 'idle');
+}
+
+// ═══════════════════════════════════════════════════════════
+// Message handler
+// ═══════════════════════════════════════════════════════════
+// Last user choice for the line-diff pickers — survives picker re-population
+// when new messages arrive. 'latest' means "always pin to the newest message".
+const lineDiffPick = { a: 'latest', b: 'latest', pair: '' };
+
+function handleMsg(s, d) {
+  if (d.type === 'error') {
+    appendStream(s, `<div class="msg"><span style="color:var(--error)">Error: ${esc(d.message)}</span></div>`);
+    return;
+  }
+  if (d.type === 'consume-started') {
+    appendStream(s, `<div class="msg"><span class="meta" style="color:var(--primary)">▶ Listening: ${esc(d.topicPath || '')}</span></div>`);
+    return;
+  }
+  if (d.type === 'consume-stopped') {
+    appendStream(s, `<div class="msg"><span class="meta">⏹ Stopped.</span></div>`);
+    closeConsumer(s);
+    if (!side.a.running && !side.b.running) {
+      document.getElementById('start-btn').disabled = false;
+      document.getElementById('stop-btn').disabled  = true;
+    }
+    return;
+  }
+  if (d.type !== 'messages') return;
+  if (d.stderr) {
+    appendStream(s, `<div class="msg"><span style="color:var(--error)">${esc(d.stderr)}</span></div>`);
+    return;
+  }
+  const msgs = d.parsedMessages || [];
+  for (const m of msgs) {
+    const decoded = m.decoded || tryParseJson(m.text || m.raw);
+    const entry = {
+      ts:       d.timestamp || new Date().toISOString(),
+      decoded:  decoded || null,
+      text:     m.text || m.raw || '',
+      metaLine: m.metaLine || ''
+    };
+    side[s].msgs.push(entry);
+    side[s].latest = entry;
+    document.getElementById('cnt-' + s).textContent = side[s].msgs.length;
+    document.getElementById('cnt-time').textContent = new Date().toLocaleTimeString();
+
+    renderStreamMsg(s, entry);
+    indexPair(s, entry);
+  }
+  renderDiff();
+  renderPairs();
+  updatePairPill();
+  populateLineDiffPickers();
+  if (activeTab === 'linediff') renderLineDiff();
+}
+
+function tryParseJson(text) {
+  if (!text || typeof text !== 'string') return null;
+  const idx = text.indexOf('{');
+  if (idx < 0) return null;
+  try { return JSON.parse(text.slice(idx)); } catch { return null; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Correlation
+// ═══════════════════════════════════════════════════════════
+function currentKeyPath() {
+  return (document.getElementById('key-input').value || '').trim();
+}
+
+function pickAutoKey(obj) {
+  for (const path of KEY_CANDIDATES) {
+    const v = getPath(obj, path);
+    if (v != null && typeof v !== 'object') return path;
+  }
+  return null;
+}
+
+function getPath(obj, path) {
+  if (!obj || !path) return undefined;
+  const parts = path.split('.').filter(Boolean);
+  let cur = obj;
+  for (const p of parts) {
+    if (cur == null || typeof cur !== 'object') return undefined;
+    cur = cur[p];
+  }
+  return cur;
+}
+
+function indexPair(s, entry) {
+  if (!entry.decoded) return;
+  let path = currentKeyPath();
+  if (!path) {
+    path = pickAutoKey(entry.decoded);
+    if (!path && side[s === 'a' ? 'b' : 'a'].latest?.decoded) {
+      path = pickAutoKey(side[s === 'a' ? 'b' : 'a'].latest.decoded);
+    }
+  }
+  if (!path) return;
+  document.getElementById('cnt-key').textContent = path;
+
+  const key = getPath(entry.decoded, path);
+  if (key == null) return;
+  const k = String(key);
+
+  let pair = pairsByKey.get(k);
+  if (!pair) {
+    pair = { key: k, a: null, b: null, ts: Date.now() };
+    pairsByKey.set(k, pair);
+  }
+  pair[s] = entry;
+  pair.ts = Date.now();
+}
+
+// ═══════════════════════════════════════════════════════════
+// Diff renderer (flatten → row-per-path)
+// ═══════════════════════════════════════════════════════════
+
+// Detect runtime type ('object', 'array', 'null', 'string', 'number', 'boolean')
+function typeOf(v) {
+  if (v === null) return 'null';
+  if (Array.isArray(v)) return 'array';
+  return typeof v;
+}
+
+// Flatten a JSON document into { dotPath → leafValue }.
+//   normalizeArrays=true   → arrays collapse to a single [*] entry per inner path
+//                            (used for STRUCTURE checks, so [0]/[1]/… don't pollute).
+//   normalizeArrays=false  → arrays expand to [0], [1], … (used for VALUE checks).
+function flatten(obj, prefix = '', out = {}, normalizeArrays = false) {
+  if (obj == null) { out[prefix || '$'] = null; return out; }
+  if (typeof obj !== 'object') { out[prefix || '$'] = obj; return out; }
+  if (Array.isArray(obj)) {
+    if (!obj.length) { out[prefix || '$'] = []; return out; }
+    if (normalizeArrays) {
+      for (const item of obj) flatten(item, `${prefix}[*]`, out, true);
+    } else {
+      obj.forEach((v, i) => flatten(v, `${prefix}[${i}]`, out, false));
+    }
+    return out;
+  }
+  const keys = Object.keys(obj);
+  if (!keys.length) { out[prefix || '$'] = {}; return out; }
+  for (const k of keys) {
+    const p = prefix ? `${prefix}.${k}` : k;
+    flatten(obj[k], p, out, normalizeArrays);
+  }
+  return out;
+}
+
+// STRUCTURE diff — names + types only, array-index-normalized.
+// Row kinds:
+//   match    → path exists on both sides with same type
+//   typediff → path exists on both sides with different types
+//   onlyA    → path missing on B
+//   onlyB    → path missing on A
+function diffStructure(a, b) {
+  const fa = flatten(a || {}, '', {}, true);
+  const fb = flatten(b || {}, '', {}, true);
+  const all = new Set([...Object.keys(fa), ...Object.keys(fb)]);
+  const rows = [];
+  let nMatch = 0, nType = 0, nA = 0, nB = 0;
+  for (const path of [...all].sort()) {
+    const inA = path in fa, inB = path in fb;
+    if (inA && inB) {
+      const tA = typeOf(fa[path]), tB = typeOf(fb[path]);
+      if (tA === tB) { rows.push({ path, a: tA, b: tB, kind: 'match',    label: 'OK',       isType: true }); nMatch++; }
+      else           { rows.push({ path, a: tA, b: tB, kind: 'typediff', label: 'Type ≠',   isType: true }); nType++;  }
+    } else if (inA) { rows.push({ path, a: typeOf(fa[path]), b: '—', kind: 'onlyA', label: 'A only', isType: true }); nA++; }
+    else            { rows.push({ path, a: '—', b: typeOf(fb[path]), kind: 'onlyB', label: 'B only', isType: true }); nB++; }
+  }
+  const total = nMatch + nType + nA + nB;
+  const sharedDenom = nMatch + nType + nA + nB; // total unique paths
+  const matchPct = sharedDenom ? Math.round((nMatch / sharedDenom) * 100) : 0;
+  return { rows, nMatch, nType, nA, nB, total, matchPct, sharedDenom };
+}
+
+// VALUE diff — for paths present on both sides only, compare actual values.
+// Row kinds:
+//   equal    → both sides have the same value
+//   diff     → both sides have a value, but different
+function diffValues(a, b) {
+  const fa = flatten(a || {}, '', {}, false);
+  const fb = flatten(b || {}, '', {}, false);
+  const shared = [...Object.keys(fa)].filter((p) => p in fb).sort();
+  const rows = [];
+  let nEq = 0, nDiff = 0;
+  for (const path of shared) {
+    const eq = stableStr(fa[path]) === stableStr(fb[path]);
+    rows.push({ path, a: fa[path], b: fb[path], kind: eq ? 'equal' : 'diff', label: eq ? 'Equal' : 'Differs' });
+    if (eq) nEq++; else nDiff++;
+  }
+  return { rows, nEq, nDiff, totalShared: shared.length };
+}
+
+// BOTH diff — value-level rows with type-mismatch and only-on-one-side merged in.
+// Row kinds: equal · diff · typediff · onlyA · onlyB
+function diffBoth(a, b) {
+  const fa = flatten(a || {}, '', {}, false);
+  const fb = flatten(b || {}, '', {}, false);
+  const all = new Set([...Object.keys(fa), ...Object.keys(fb)]);
+  const rows = [];
+  let nEq = 0, nDiff = 0, nType = 0, nA = 0, nB = 0;
+  for (const path of [...all].sort()) {
+    const inA = path in fa, inB = path in fb;
+    if (inA && inB) {
+      const tA = typeOf(fa[path]), tB = typeOf(fb[path]);
+      if (tA !== tB) { rows.push({ path, a: fa[path], b: fb[path], kind: 'typediff', label: `Type ≠ (${tA} / ${tB})` }); nType++; }
+      else if (stableStr(fa[path]) === stableStr(fb[path])) { rows.push({ path, a: fa[path], b: fb[path], kind: 'equal', label: 'Equal' }); nEq++; }
+      else { rows.push({ path, a: fa[path], b: fb[path], kind: 'diff', label: 'Differs' }); nDiff++; }
+    } else if (inA) { rows.push({ path, a: fa[path], b: '—', kind: 'onlyA', label: 'A only' }); nA++; }
+    else            { rows.push({ path, a: '—', b: fb[path], kind: 'onlyB', label: 'B only' }); nB++; }
+  }
+  return { rows, nEq, nDiff, nType, nA, nB };
+}
+
+// Run the right diff for the current mode.
+function diffForMode(a, b) {
+  if (mode === 'structure') return { kind: 'structure', ...diffStructure(a, b), structure: diffStructure(a, b) };
+  if (mode === 'values')    return { kind: 'values',    ...diffValues(a, b),    structure: diffStructure(a, b) };
+  return                          { kind: 'both',       ...diffBoth(a, b),      structure: diffStructure(a, b) };
+}
+
+// Pills / summary line per mode.
+function summaryHtml(d) {
+  if (d.kind === 'structure') {
+    return `
+      <span class="pill match">${d.nMatch} matching</span>
+      <span class="pill typediff">${d.nType} type ≠</span>
+      <span class="pill onlyA">${d.nA} A only</span>
+      <span class="pill onlyB">${d.nB} B only</span>
+      <span class="pill" style="background:var(--panel2);color:var(--muted);border:1px solid var(--border)">${d.total} total paths</span>
+    `;
+  }
+  if (d.kind === 'values') {
+    return `
+      <span class="pill equal">${d.nEq} equal</span>
+      <span class="pill diff">${d.nDiff} differ</span>
+      <span class="pill" style="background:var(--panel2);color:var(--muted);border:1px solid var(--border)">${d.totalShared} shared paths</span>
+    `;
+  }
+  return `
+    <span class="pill equal">${d.nEq} equal</span>
+    <span class="pill diff">${d.nDiff} differ</span>
+    <span class="pill typediff">${d.nType} type ≠</span>
+    <span class="pill onlyA">${d.nA} A only</span>
+    <span class="pill onlyB">${d.nB} B only</span>
+  `;
+}
+
+// Filter chips per mode.
+function filterHtml() {
+  const f = filtersByMode[mode];
+  const chip = (k, label) => `<button class="chip ${f[k] ? 'on' : ''}" onclick="toggleFilter('${k}', this)">${label}</button>`;
+  if (mode === 'structure') {
+    return `<span class="filter-label">Show</span>
+      ${chip('typediff', 'Type mismatches')}
+      ${chip('onlyA',    'A only')}
+      ${chip('onlyB',    'B only')}
+      ${chip('match',    'Matching')}`;
+  }
+  if (mode === 'values') {
+    return `<span class="filter-label">Show</span>
+      ${chip('diff',  'Different values')}
+      ${chip('equal', 'Identical values')}`;
+  }
+  return `<span class="filter-label">Show</span>
+    ${chip('diff',     'Different values')}
+    ${chip('typediff', 'Type mismatches')}
+    ${chip('onlyA',    'A only')}
+    ${chip('onlyB',    'B only')}
+    ${chip('equal',    'Identical')}`;
+}
+
+// Column headers per mode.
+function headHtml() {
+  if (mode === 'structure') {
+    return `<th>Field path</th><th>Type in A</th><th>Type in B</th><th>Status</th>`;
+  }
+  if (mode === 'values') {
+    return `<th>Field path</th><th>Value in A</th><th>Value in B</th><th>Status</th>`;
+  }
+  return `<th>Field path</th><th>Source A</th><th>Source B</th><th>Status</th>`;
+}
+
+function tableBody(rows) {
+  const f = filtersByMode[mode];
+  const out = [];
+  for (const r of rows) {
+    if (f[r.kind] === false) continue;
+    const aVal = r.isType ? `<span class="type-tag">${esc(r.a)}</span>` : esc(fmtVal(r.a));
+    const bVal = r.isType ? `<span class="type-tag">${esc(r.b)}</span>` : esc(fmtVal(r.b));
+    out.push(`<tr class="${r.kind}">
+      <td class="path">${esc(r.path)}</td>
+      <td class="val-a">${aVal}</td>
+      <td class="val-b">${bVal}</td>
+      <td><span class="badge-status">${esc(r.label || r.kind)}</span></td>
+    </tr>`);
+  }
+  return out.join('') || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:18px">No rows match the active filters.</td></tr>`;
+}
+
+function renderDiff() {
+  const a = side.a.latest?.decoded;
+  const b = side.b.latest?.decoded;
+  const view  = document.getElementById('diff-view');
+  const empty = document.getElementById('diff-empty');
+  if (!a && !b) { view.style.display = 'none'; empty.style.display = 'flex'; return; }
+  view.style.display = ''; empty.style.display = 'none';
+
+  // Mode hint
+  document.getElementById('mode-hint').innerHTML = MODE_HINTS[mode];
+
+  // Snapshots
+  document.getElementById('snap-a').textContent = a ? safeJson(a) : '(awaiting message on A…)';
+  document.getElementById('snap-b').textContent = b ? safeJson(b) : '(awaiting message on B…)';
+
+  // Schema match score — always computed from structure diff regardless of mode
+  const struct = diffStructure(a, b);
+  const scoreEl = document.getElementById('score-value');
+  scoreEl.textContent = (a && b) ? `${struct.matchPct}%` : '—';
+  scoreEl.className   = 'score-value ' + (struct.matchPct >= 95 ? 'good' : struct.matchPct >= 75 ? 'mid' : 'bad');
+  document.getElementById('score-fill').style.width  = (a && b) ? `${struct.matchPct}%` : '0%';
+  document.getElementById('score-shared').textContent = (a && b)
+    ? `${struct.nMatch} / ${struct.total}`
+    : '— / —';
+  document.getElementById('score-meta').innerHTML = (a && b)
+    ? `<strong>${struct.nMatch}</strong> matching paths · <strong>${struct.nType}</strong> type ≠ · <strong>${struct.nA}</strong> only in A · <strong>${struct.nB}</strong> only in B.
+       Arrays normalized to <code>[*]</code> for fair structural comparison.`
+    : (a ? 'B has no message yet.' : b ? 'A has no message yet.' : 'Awaiting first message on both sides…');
+
+  // Mode-driven diff
+  const d = diffForMode(a, b);
+  document.getElementById('diff-summary').innerHTML = summaryHtml(d);
+  document.getElementById('diff-filter').innerHTML  = filterHtml();
+  document.getElementById('diff-head').innerHTML    = headHtml();
+  document.getElementById('diff-body').innerHTML    = tableBody(d.rows);
+}
+
+function setMode(m) {
+  if (mode === m) return;
+  mode = m;
+  document.querySelectorAll('.seg').forEach((el) => el.classList.toggle('active', el.dataset.mode === m));
+  renderDiff();
+  renderPairs();
+}
+
+function fmtVal(v) {
+  if (v == null) return '—';
+  if (typeof v === 'object') {
+    try { return safeJson(v); } catch { return String(v); }
+  }
+  const s = String(v);
+  return s.length > 240 ? s.slice(0, 240) + '…' : s;
+}
+
+function stableStr(v) {
+  if (v == null) return 'null';
+  if (typeof v !== 'object') return String(v);
+  try { return JSON.stringify(v); } catch { return String(v); }
+}
+
+function safeJson(obj) {
+  try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+}
+
+function toggleFilter(name, btn) {
+  const f = filtersByMode[mode];
+  f[name] = !f[name];
+  btn.classList.toggle('on', f[name]);
+  renderDiff();
+  renderPairs();
+}
+
+// ═══════════════════════════════════════════════════════════
+// Matched pairs view
+// ═══════════════════════════════════════════════════════════
+function renderPairs() {
+  const pairs = [...pairsByKey.values()].filter(p => p.a && p.b).sort((x, y) => y.ts - x.ts);
+  document.getElementById('cnt-pairs').textContent = pairs.length;
+  const empty = document.getElementById('pairs-empty');
+  const list  = document.getElementById('pairs-list');
+  if (!pairs.length) { empty.style.display = 'flex'; list.innerHTML = ''; return; }
+  empty.style.display = 'none';
+
+  list.innerHTML = pairs.map((p, i) => {
+    const struct = diffStructure(p.a.decoded, p.b.decoded);
+    const d      = diffForMode(p.a.decoded, p.b.decoded);
+    const head   = headHtml();
+    const body   = tableBody(d.rows);
+    return `<div class="pair" id="pair-${i}">
+      <div class="pair-head">
+        <span class="key">${esc(p.key)}</span>
+        <span class="pill match">schema ${struct.matchPct}%</span>
+        ${summaryHtml(d)}
+        <span class="meta">A: ${esc(new Date(p.a.ts).toLocaleTimeString())} · B: ${esc(new Date(p.b.ts).toLocaleTimeString())}</span>
+        <button class="pair-toggle" onclick="this.closest('.pair').classList.toggle('open')">Toggle fields</button>
+      </div>
+      <div class="pair-body">
+        <table class="diff-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updatePairPill() {
+  const n = [...pairsByKey.values()].filter(p => p.a && p.b).length;
+  const pill = document.getElementById('pill-pairs');
+  if (n > 0) { pill.style.display = 'inline-block'; pill.textContent = n; }
+  else pill.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// Stream view
+// ═══════════════════════════════════════════════════════════
+function renderStreamMsg(s, entry) {
+  const html = `<div class="msg">
+    ${entry.metaLine ? `<div class="meta">${esc(entry.metaLine)}</div>` : ''}
+    ${entry.decoded ? esc(safeJson(entry.decoded)) : esc(entry.text || '(empty)')}
+    <div class="ts">${esc(entry.ts)}</div>
+  </div>`;
+  appendStream(s, html);
+}
+
+function appendStream(s, html) {
+  const el = document.getElementById('stream-' + s);
+  if (!el) return;
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  el.appendChild(d.firstChild);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Tabs / Export
+// ═══════════════════════════════════════════════════════════
+function switchTab(name) {
+  activeTab = name;
+  for (const el of document.querySelectorAll('.tab'))   el.classList.toggle('active', el.dataset.tab === name);
+  for (const el of document.querySelectorAll('.panel')) el.classList.toggle('active', el.id === 'panel-' + name);
+  if (name === 'linediff') {
+    populateLineDiffPickers();
+    renderLineDiff();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Side-by-side line diff (VSCode-style)
+// ═══════════════════════════════════════════════════════════
+
+// Pick which actual message object to feed into the line diff for one side.
+function selectedMessage(s) {
+  const pick = lineDiffPick[s];
+  if (pick === 'latest' || pick === '' || pick == null) return side[s].latest;
+  const idx = parseInt(pick, 10);
+  if (Number.isNaN(idx)) return side[s].latest;
+  return side[s].msgs[idx] || side[s].latest;
+}
+
+function msgShortLabel(s, m) {
+  if (!m) return '(none)';
+  const dt = (() => { try { return new Date(m.ts).toLocaleTimeString(); } catch { return m.ts || ''; } })();
+  const keyPath = currentKeyPath() || (m.decoded ? pickAutoKey(m.decoded) : null);
+  const keyVal  = keyPath && m.decoded ? getPath(m.decoded, keyPath) : null;
+  if (keyVal != null) return `${dt} · ${keyPath}=${String(keyVal).slice(0, 40)}`;
+  if (m.metaLine)     return `${dt} · ${m.metaLine.slice(0, 60)}`;
+  const raw = (m.text || '').replace(/\s+/g, ' ').trim();
+  return raw ? `${dt} · ${raw.slice(0, 60)}` : dt;
+}
+
+function populateLineDiffPickers() {
+  for (const s of ['a','b']) {
+    const sel = document.getElementById('linediff-pick-' + s);
+    if (!sel) return;
+    const opts = ['<option value="latest">▶ Latest message (live)</option>'];
+    side[s].msgs.forEach((m, i) => {
+      opts.push(`<option value="${i}">#${i+1} · ${esc(msgShortLabel(s, m))}</option>`);
+    });
+    sel.innerHTML = opts.join('');
+    // Restore previous pick if still valid; otherwise fall back to latest.
+    const prev = lineDiffPick[s];
+    if (prev === 'latest' || (prev !== '' && parseInt(prev, 10) < side[s].msgs.length)) {
+      sel.value = prev;
+    } else {
+      sel.value = 'latest';
+      lineDiffPick[s] = 'latest';
+    }
+    sel.onchange = () => { lineDiffPick[s] = sel.value; lineDiffPick.pair = ''; document.getElementById('linediff-pick-pair').value = ''; renderLineDiff(); };
+  }
+
+  // Matched-pair shortcut
+  const selP = document.getElementById('linediff-pick-pair');
+  const pairs = [...pairsByKey.values()].filter((p) => p.a && p.b).sort((x, y) => y.ts - x.ts);
+  const opts = ['<option value="">— manual selection —</option>'];
+  for (const p of pairs) opts.push(`<option value="${esc(p.key)}">${esc(p.key)}</option>`);
+  selP.innerHTML = opts.join('');
+  if (lineDiffPick.pair && pairs.some((p) => p.key === lineDiffPick.pair)) selP.value = lineDiffPick.pair;
+  else selP.value = '';
+}
+
+function pickPairForLineDiff() {
+  const selP = document.getElementById('linediff-pick-pair');
+  const key  = selP.value;
+  lineDiffPick.pair = key;
+  if (!key) { renderLineDiff(); return; }
+  const pair = pairsByKey.get(key);
+  if (!pair) return;
+  const aIdx = side.a.msgs.indexOf(pair.a);
+  const bIdx = side.b.msgs.indexOf(pair.b);
+  if (aIdx >= 0) { lineDiffPick.a = String(aIdx); document.getElementById('linediff-pick-a').value = String(aIdx); }
+  if (bIdx >= 0) { lineDiffPick.b = String(bIdx); document.getElementById('linediff-pick-b').value = String(bIdx); }
+  renderLineDiff();
+}
+
+// Line-level diff using LCS dynamic programming.
+//   Returns { rows, eq, del, add, mod, truncated }
+//   For very large inputs (> CAP lines), falls back to a naive zip so the
+//   browser doesn't hang.
+function computeLineDiff(a, b) {
+  const m = a.length, n = b.length;
+  const CAP = 2500;
+  if (m > CAP || n > CAP) {
+    const rows = [];
+    let eq = 0, mod = 0, del = 0, add = 0;
+    const max = Math.max(m, n);
+    for (let i = 0; i < max; i++) {
+      const lA = i < m ? a[i] : null;
+      const lB = i < n ? b[i] : null;
+      let kind;
+      if (lA == null) { kind = 'add'; add++; }
+      else if (lB == null) { kind = 'del'; del++; }
+      else if (lA === lB) { kind = 'eq'; eq++; }
+      else { kind = 'mod'; mod++; }
+      rows.push({ left: lA, right: lB, leftNum: lA != null ? i+1 : null, rightNum: lB != null ? i+1 : null, kind });
+    }
+    return { rows, eq, mod, del, add, truncated: true };
+  }
+  const dp = new Array(m + 1);
+  for (let i = 0; i <= m; i++) dp[i] = new Int32Array(n + 1);
+  for (let i = 1; i <= m; i++) {
+    const ai = a[i-1];
+    const row = dp[i], prev = dp[i-1];
+    for (let j = 1; j <= n; j++) {
+      if (ai === b[j-1]) row[j] = prev[j-1] + 1;
+      else row[j] = prev[j] >= row[j-1] ? prev[j] : row[j-1];
+    }
+  }
+  const ops = [];
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (a[i-1] === b[j-1]) { ops.push({ t: 'eq', aIdx: i-1, bIdx: j-1, line: a[i-1] }); i--; j--; }
+    else if (dp[i-1][j] >= dp[i][j-1]) { ops.push({ t: 'del', aIdx: i-1, line: a[i-1] }); i--; }
+    else { ops.push({ t: 'add', bIdx: j-1, line: b[j-1] }); j--; }
+  }
+  while (i > 0) { ops.push({ t: 'del', aIdx: i-1, line: a[i-1] }); i--; }
+  while (j > 0) { ops.push({ t: 'add', bIdx: j-1, line: b[j-1] }); j--; }
+  ops.reverse();
+
+  // Pair any consecutive del/add ops into "mod" rows so they line up visually
+  // like VSCode. The LCS backtracking can interleave dels and adds either way
+  // (del-first or add-first), so we collect all non-eq ops in the block, split
+  // them by type, then zip the two lists.
+  const rows = [];
+  let eq = 0, del = 0, add = 0, mod = 0;
+  let k = 0;
+  while (k < ops.length) {
+    const op = ops[k];
+    if (op.t === 'eq') {
+      rows.push({ left: op.line, right: op.line, leftNum: op.aIdx + 1, rightNum: op.bIdx + 1, kind: 'eq' });
+      eq++; k++;
+      continue;
+    }
+    const dels = [];
+    const adds = [];
+    while (k < ops.length && ops[k].t !== 'eq') {
+      if (ops[k].t === 'del') dels.push(ops[k]);
+      else adds.push(ops[k]);
+      k++;
+    }
+    const mx = Math.max(dels.length, adds.length);
+    for (let x = 0; x < mx; x++) {
+      const d = dels[x], aOp = adds[x];
+      if (d && aOp) { rows.push({ left: d.line, right: aOp.line, leftNum: d.aIdx + 1, rightNum: aOp.bIdx + 1, kind: 'mod' }); mod++; }
+      else if (d)   { rows.push({ left: d.line, right: null,     leftNum: d.aIdx + 1, rightNum: null,           kind: 'del' }); del++; }
+      else          { rows.push({ left: null,   right: aOp.line, leftNum: null,       rightNum: aOp.bIdx + 1,   kind: 'add' }); add++; }
+    }
+  }
+  return { rows, eq, mod, del, add, truncated: false };
+}
+
+function messageBody(m) {
+  if (!m) return '';
+  if (m.decoded) return safeJson(m.decoded);
+  const t = m.text || m.raw || '';
+  try {
+    const obj = JSON.parse(t);
+    return safeJson(obj);
+  } catch {
+    return t;
+  }
+}
+
+function renderLineDiff() {
+  const sel = document.getElementById('linediff-pick-a');
+  if (sel) lineDiffPick.a = sel.value;
+  const selB = document.getElementById('linediff-pick-b');
+  if (selB) lineDiffPick.b = selB.value;
+
+  const a = selectedMessage('a');
+  const b = selectedMessage('b');
+  const scroll  = document.getElementById('linediff-scroll');
+  const empty   = document.getElementById('linediff-empty');
+  const summary = document.getElementById('linediff-summary');
+
+  if (!a || !b) {
+    if (scroll) scroll.style.display = 'none';
+    if (empty)  empty.style.display  = 'flex';
+    if (summary) summary.textContent = !a && !b
+      ? 'Pick a message on each side (or use the matched-key dropdown) to see a line-by-line diff.'
+      : !a ? 'Side A has no message yet.' : 'Side B has no message yet.';
+    return;
+  }
+  if (empty)  empty.style.display  = 'none';
+  if (scroll) scroll.style.display = '';
+
+  const textA = messageBody(a);
+  const textB = messageBody(b);
+  const linesA = textA.split('\n');
+  const linesB = textB.split('\n');
+
+  const t0 = performance.now();
+  const { rows, eq, mod, del, add, truncated } = computeLineDiff(linesA, linesB);
+  const took = Math.round(performance.now() - t0);
+
+  const tagA = `${side.a.bus}/${side.a.env?.id || '?'}/${side.a.topic?.topic || '?'}`;
+  const tagB = `${side.b.bus}/${side.b.env?.id || '?'}/${side.b.topic?.topic || '?'}`;
+
+  summary.innerHTML =
+    `<strong>${linesA.length}</strong> lines on A (<span style="color:var(--pulsar)">${esc(tagA)}</span>) · ` +
+    `<strong>${linesB.length}</strong> on B (<span style="color:var(--kafka)">${esc(tagB)}</span>) — ` +
+    `<span style="color:var(--success)">${eq} equal</span> · ` +
+    `<span style="color:var(--warning)">${mod} modified</span> · ` +
+    `<span style="color:var(--error)">${del} only-in-A</span> · ` +
+    `<span style="color:var(--success)">${add} only-in-B</span>` +
+    (truncated ? ` · <span style="color:var(--warning)">truncated (>${2500} lines, naive align)</span>` : '') +
+    ` · diff in ${took} ms`;
+
+  const html = rows.map((r) => `<div class="linediff-row ${r.kind}">
+    <span class="num left">${r.leftNum != null ? r.leftNum : ''}</span>
+    <pre class="line left${r.left == null ? ' empty' : ''}">${esc(r.left ?? '')}</pre>
+    <span class="num right">${r.rightNum != null ? r.rightNum : ''}</span>
+    <pre class="line right${r.right == null ? ' empty' : ''}">${esc(r.right ?? '')}</pre>
+  </div>`).join('');
+  document.getElementById('linediff-rows').innerHTML = html;
+}
+
+function copyUnifiedDiff() {
+  const a = selectedMessage('a');
+  const b = selectedMessage('b');
+  if (!a || !b) { alert('Pick a message on each side first.'); return; }
+  const textA = messageBody(a);
+  const textB = messageBody(b);
+  const { rows } = computeLineDiff(textA.split('\n'), textB.split('\n'));
+
+  const tagA = `${side.a.bus}/${side.a.env?.id || '?'}/${side.a.topic?.topic || '?'}@${a.ts || ''}`;
+  const tagB = `${side.b.bus}/${side.b.env?.id || '?'}/${side.b.topic?.topic || '?'}@${b.ts || ''}`;
+
+  const out = [`--- A  ${tagA}`, `+++ B  ${tagB}`];
+  for (const r of rows) {
+    if (r.kind === 'eq')   out.push(' ' + (r.left ?? ''));
+    else if (r.kind === 'del') out.push('-' + (r.left ?? ''));
+    else if (r.kind === 'add') out.push('+' + (r.right ?? ''));
+    else if (r.kind === 'mod') { out.push('-' + (r.left ?? '')); out.push('+' + (r.right ?? '')); }
+  }
+  const text = out.join('\n') + '\n';
+
+  const done = () => {
+    const btn = document.querySelector('button[onclick="copyUnifiedDiff()"]');
+    if (!btn) return;
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => { btn.textContent = orig; }, 1400);
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); cb?.(); } catch {}
+  document.body.removeChild(ta);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Exports — JSON, CSV, and Markdown report
+// ═══════════════════════════════════════════════════════════
+
+function toggleExportMenu(ev) {
+  if (ev) ev.stopPropagation();
+  document.getElementById('export-menu').classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('export-menu');
+  if (!menu) return;
+  if (!menu.contains(e.target)) menu.classList.remove('open');
+});
+
+function closeExportMenu() {
+  document.getElementById('export-menu')?.classList.remove('open');
+}
+
+function downloadBlob(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportFilenameBase() {
+  const ts  = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const tag = (s) => (side[s].topic?.topic?.split(/[./]/).filter(Boolean).pop() || side[s].bus || '?');
+  return `compare-${tag('a')}-vs-${tag('b')}-${ts}`;
+}
+
+// Build the canonical export payload used by all three exports.
+function buildExportPayload() {
+  const aDec = side.a.latest?.decoded;
+  const bDec = side.b.latest?.decoded;
+  const latestDiff = (aDec && bDec) ? {
+    structure: diffStructure(aDec, bDec),
+    values:    diffValues(aDec, bDec),
+    both:      diffBoth(aDec, bDec)
+  } : null;
+  const matchedPairs = [...pairsByKey.values()].filter((p) => p.a && p.b);
+  return {
+    meta: {
+      exportedAt: new Date().toISOString(),
+      correlationKey: document.getElementById('cnt-key').textContent,
+      sourceA: side.a.env && side.a.topic ? { bus: side.a.bus, env: side.a.env.id, topic: side.a.topic.topic, description: side.a.topic.description || null } : null,
+      sourceB: side.b.env && side.b.topic ? { bus: side.b.bus, env: side.b.env.id, topic: side.b.topic.topic, description: side.b.topic.description || null } : null,
+      counts:  { a: side.a.msgs.length, b: side.b.msgs.length, matched: matchedPairs.length },
+      schemaMatchPct: latestDiff?.structure.matchPct ?? null
+    },
+    latest:   { a: aDec || side.a.latest?.text || null, b: bDec || side.b.latest?.text || null },
+    diff:     latestDiff,
+    pairs:    matchedPairs.map((p) => ({
+      key: p.key,
+      a: { ts: p.a.ts, content: p.a.decoded || p.a.text },
+      b: { ts: p.b.ts, content: p.b.decoded || p.b.text },
+      diff: {
+        structure: diffStructure(p.a.decoded, p.b.decoded),
+        values:    diffValues(p.a.decoded, p.b.decoded),
+        both:      diffBoth(p.a.decoded, p.b.decoded)
+      }
+    })),
+    streamA:  side.a.msgs,
+    streamB:  side.b.msgs
+  };
+}
+
+// ── JSON export — three self-contained files ────────────────
+//
+// File names are kept short and human-readable so a Downloads folder stays
+// usable even months later. For a Pulsar
+// (`persistent://gcd/soccer-inbound/game-state`) vs Kafka
+// (`trading.soccer.nxt.sgt`) comparison the export drops:
+//
+//   • game-stateResponse.json
+//       Everything about Source A: its identity, the latest decoded message,
+//       and the full receive buffer for this session.
+//   • trading.soccer.nxt.sgtResponse.json
+//       Same shape, for Source B.
+//   • comparison.json
+//       The cross-cutting analysis (meta, structure/value diff for the
+//       latest snapshot, matched pairs with their per-pair diffs).
+//
+// Each file is independently usable: the topic-named side files stand alone
+// for "what is this topic emitting?" inspections, and `comparison.json`
+// stands alone for "how do they differ?" reviews — no need to crack open
+// the other two unless you need raw data.
+
+// Take the last meaningful segment of a topic name — works for Pulsar's
+// `persistent://tenant/namespace/leaf` and Kafka's dotted `a.b.c.d` style.
+function topicLeaf(topic) {
+  if (!topic) return '';
+  const stripped = String(topic).replace(/^(?:non-)?persistent:\/\//, '');
+  const segs = stripped.split('/').filter(Boolean);
+  return segs[segs.length - 1] || stripped;
+}
+
+// Filesystem-safe sanitisation of a topic-derived label.
+function safeFilenamePart(s) {
+  return String(s || '')
+    .replace(/[\\/]+/g, '-')
+    .replace(/[:?*<>|"]+/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^[-.]+|[-.]+$/g, '');
+}
+
+// Side filename: `<leaf>Response.json`. If both topics happen to share the
+// same leaf (e.g. same logical topic on Pulsar and Kafka), the colliding side
+// gets a bus/env prefix so the two downloads don't try to overwrite each
+// other in the user's Downloads folder.
+function sideFilename(meta, sideLetter, otherMeta) {
+  const fallback = `source-${sideLetter}`;
+  const leaf = topicLeaf(meta?.topic) || fallback;
+  let label = safeFilenamePart(leaf) || fallback;
+  const otherLeaf = otherMeta?.topic ? safeFilenamePart(topicLeaf(otherMeta.topic)) : '';
+  if (otherLeaf && otherLeaf === label) {
+    const tag = meta?.bus || meta?.env || fallback;
+    label = `${safeFilenamePart(tag)}-${label}`;
+  }
+  return `${label}Response.json`;
+}
+
+function exportJson() {
+  closeExportMenu();
+  const payload = buildExportPayload();
+
+  const sideFile = (which) => ({
+    source: payload.meta[which === 'a' ? 'sourceA' : 'sourceB'],
+    messagesReceived: payload.meta.counts[which],
+    exportedAt: payload.meta.exportedAt,
+    latest: payload.latest[which],
+    stream: which === 'a' ? payload.streamA : payload.streamB
+  });
+
+  const comparisonFile = {
+    meta: {
+      exportedAt:     payload.meta.exportedAt,
+      correlationKey: payload.meta.correlationKey,
+      schemaMatchPct: payload.meta.schemaMatchPct,
+      sourceA:        payload.meta.sourceA,
+      sourceB:        payload.meta.sourceB,
+      counts:         payload.meta.counts
+    },
+    diff:  payload.diff,
+    pairs: payload.pairs
+  };
+
+  const stringify = (o) => JSON.stringify(o, null, 2);
+
+  const nameA       = sideFilename(payload.meta.sourceA, 'a', payload.meta.sourceB);
+  const nameB       = sideFilename(payload.meta.sourceB, 'b', payload.meta.sourceA);
+  const nameCompare = 'comparison.json';
+
+  // Trigger three sequential downloads. Most browsers accept this as a single
+  // user-gesture batch (Chrome/Edge/Firefox), with a one-time "<site> wants
+  // to download multiple files" consent prompt the first time. The small
+  // delays avoid the rare timing race where two clicks fire on the same tick.
+  downloadBlob(nameA, stringify(sideFile('a')), 'application/json');
+  setTimeout(() => downloadBlob(nameB,       stringify(sideFile('b')),       'application/json'), 120);
+  setTimeout(() => downloadBlob(nameCompare, stringify(comparisonFile),      'application/json'), 240);
+}
+
+// ── Shared diff helpers (used by CSV + Markdown) ────────────
+// Canonical, uppercase status labels — same vocabulary in CSV "Status" col,
+// Markdown headings, and the legend in README.md.
+const KIND_STATUS = {
+  equal:    'MATCH',
+  diff:     'VALUE_DIFFERS',
+  typediff: 'TYPE_MISMATCH',
+  onlyA:    'ONLY_IN_A',
+  onlyB:    'ONLY_IN_B'
+};
+
+// Severity = "how actionable is this for a topic-vs-topic review", 0 quiet → 3 loud.
+//   3 = TYPE_MISMATCH — same path, different runtime type (almost always a bug)
+//   2 = ONLY_IN_A / ONLY_IN_B — structural drift (one side ships the field, the other doesn't)
+//   1 = VALUE_DIFFERS — same shape, different runtime value (often expected noise)
+//   0 = MATCH — fully equivalent
+const KIND_SEVERITY = { equal: 0, diff: 1, onlyA: 2, onlyB: 2, typediff: 3 };
+
+// Pretty inline labels (with icons) for the Markdown report.
+const KIND_LABEL = {
+  equal:    '✅ Match',
+  diff:     '≈ Value differs',
+  typediff: '⚠ Type mismatch',
+  onlyA:    '◧ Only in A',
+  onlyB:    '◨ Only in B'
+};
+
+function countBoth(rows) {
+  const c = { equal: 0, diff: 0, typediff: 0, onlyA: 0, onlyB: 0 };
+  for (const r of rows) if (c[r.kind] !== undefined) c[r.kind]++;
+  return c;
+}
+
+function progressBar(pct, width = 24) {
+  const p = Math.max(0, Math.min(100, Number(pct) || 0));
+  const filled = Math.round((p / 100) * width);
+  return '█'.repeat(filled) + '░'.repeat(width - filled);
+}
+
+// Sort diff rows so the loudest categories come first (TYPE_MISMATCH at top,
+// MATCH at the bottom) and within each category, by path alphabetically.
+function sortByImpact(rows) {
+  return rows.slice().sort((x, y) => {
+    const d = (KIND_SEVERITY[y.kind] ?? 0) - (KIND_SEVERITY[x.kind] ?? 0);
+    return d !== 0 ? d : String(x.path).localeCompare(String(y.path));
+  });
+}
+
+// ── CSV export — sectioned, severity-aware, spreadsheet-friendly ────────────
+//
+// Layout (in order):
+//   • META               — who/what/when. Each source's full topic name is
+//                           pinned at the top so the file is self-documenting
+//                           even after the column headers scroll off.
+//   • SUMMARY            — counts per status, ideal for pivots.
+//   • FIELD_MAPPING      — STRUCTURAL lens. One row per path; tells you
+//                           whether each field exists on both sides and
+//                           carries the same runtime type.
+//                           Status: TYPE_MATCH | TYPE_MISMATCH
+//                                 | ONLY_IN_A | ONLY_IN_B
+//   • VALUE_COMPARISON   — VALUE lens. Restricted to paths present on BOTH
+//                           sides with matching types — i.e. the paths where
+//                           a side-by-side value compare is meaningful.
+//                           Status: MATCH | VALUE_DIFFERS
+//   • PAIR               — per-pair detail rows for matched correlation keys.
+//
+// Column headers carry the actual topic short-names (e.g. `game-state` and
+// `trading.soccer.nxt.sgt`) so it's instantly obvious which column belongs
+// to which side — `Type [game-state]`, `Value [trading.soccer.nxt.sgt]`,
+// etc. — no more guessing "is A the Pulsar or the Kafka side?".
+//   Severity: 0..3 — sort descending in Excel/Sheets to surface the loudest
+//   fields. (3 = TYPE_MISMATCH, 2 = ONLY_IN_A/B, 1 = VALUE_DIFFERS, 0 = MATCH/TYPE_MATCH.)
+
+function csvCell(v) {
+  if (v == null) return '';
+  let s;
+  if (typeof v === 'object') {
+    try { s = JSON.stringify(v); } catch { s = String(v); }
+  } else {
+    s = String(v);
+  }
+  if (s.length > 500) s = s.slice(0, 500) + '…';
+  if (/[",\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function csvCellValue(v) {
+  if (v == null) return '';
+  if (typeof v === 'object') {
+    try { return JSON.stringify(v); } catch { return String(v); }
+  }
+  return String(v);
+}
+
+// Short, header-friendly label for a source. Caps long topic names so the
+// spreadsheet remains usable; the full topic name still ships in META rows.
+function csvSrcLabel(meta, fallback) {
+  const leaf = topicLeaf(meta?.topic);
+  const raw  = leaf || meta?.topic || fallback;
+  return raw.length > 40 ? raw.slice(0, 37) + '…' : raw;
+}
+
+// Vocabulary for the FIELD_MAPPING (structure) section. We deliberately use
+// `TYPE_MATCH` rather than `MATCH` here so the structural status is never
+// confused with the value-level `MATCH` used in VALUE_COMPARISON.
+const STRUCT_STATUS   = { match: 'TYPE_MATCH', typediff: 'TYPE_MISMATCH', onlyA: 'ONLY_IN_A', onlyB: 'ONLY_IN_B' };
+const STRUCT_SEVERITY = { match: 0,            typediff: 3,                onlyA: 2,           onlyB: 2 };
+
+function sortStructByImpact(rows) {
+  return rows.slice().sort((x, y) => {
+    const sev = (STRUCT_SEVERITY[y.kind] ?? 0) - (STRUCT_SEVERITY[x.kind] ?? 0);
+    return sev !== 0 ? sev : String(x.path).localeCompare(String(y.path));
+  });
+}
+
+function exportCsv() {
+  closeExportMenu();
+  const payload = buildExportPayload();
+  const rows = [];
+
+  // Header carries the topic short-names so every value column is self-labelled.
+  const labA = csvSrcLabel(payload.meta.sourceA, 'Source A');
+  const labB = csvSrcLabel(payload.meta.sourceB, 'Source B');
+  const COLS = [
+    'Section', 'Status', 'Severity', 'Path',
+    `Type [${labA}]`,  `Type [${labB}]`,
+    `Value [${labA}]`, `Value [${labB}]`,
+    'Pair Key'
+  ];
+  rows.push(COLS.map(csvCell).join(','));
+
+  const tOf = (v) => v === '—' ? '' : (v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v);
+
+  const addRow = (section, status, severity, path, typeA, typeB, valA, valB, pairKey) => {
+    rows.push([
+      section, status, severity, path, typeA, typeB,
+      csvCellValue(valA), csvCellValue(valB), pairKey || ''
+    ].map(csvCell).join(','));
+  };
+
+  const addDiffRow = (section, row, pairKey) => {
+    const inA = row.kind !== 'onlyB';
+    const inB = row.kind !== 'onlyA';
+    addRow(section,
+           KIND_STATUS[row.kind] || row.kind,
+           KIND_SEVERITY[row.kind] ?? '',
+           row.path,
+           inA ? tOf(row.a) : '',
+           inB ? tOf(row.b) : '',
+           inA ? row.a    : '',
+           inB ? row.b    : '',
+           pairKey);
+  };
+
+  // ── META: identification block. Topic names go on row 1+2 of this block
+  //    so any reader instantly knows what's being compared. A-side info
+  //    lands in the `Value [A]` column, B-side info in `Value [B]` — same
+  //    mirroring used for the diff rows below.
+  if (payload.meta.sourceA) {
+    addRow('META', 'SOURCE_A_TOPIC', '', '', '', '', payload.meta.sourceA.topic, '', '');
+  }
+  if (payload.meta.sourceB) {
+    addRow('META', 'SOURCE_B_TOPIC', '', '', '', '', '', payload.meta.sourceB.topic, '');
+  }
+  addRow('META', 'EXPORTED_AT',     '', '', '', '', payload.meta.exportedAt,           '', '');
+  addRow('META', 'CORRELATION_KEY', '', '', '', '', payload.meta.correlationKey || '', '', '');
+  addRow('META', 'SCHEMA_MATCH_PCT','', '', '', '', payload.meta.schemaMatchPct ?? '', '', '');
+  addRow('META', 'MATCHED_PAIRS',   '', '', '', '', payload.meta.counts.matched,       '', '');
+  addRow('META', 'MESSAGES_A',      '', '', '', '', payload.meta.counts.a,             '', '');
+  addRow('META', 'MESSAGES_B',      '', '', '', '', '',                                payload.meta.counts.b, '');
+  if (payload.meta.sourceA) {
+    addRow('META', 'SOURCE_A_BUS',   '', '', '', '', payload.meta.sourceA.bus, '', '');
+    addRow('META', 'SOURCE_A_ENV',   '', '', '', '', payload.meta.sourceA.env, '', '');
+    if (payload.meta.sourceA.description)
+      addRow('META', 'SOURCE_A_DESCRIPTION', '', '', '', '', payload.meta.sourceA.description, '', '');
+  }
+  if (payload.meta.sourceB) {
+    addRow('META', 'SOURCE_B_BUS',   '', '', '', '', '', payload.meta.sourceB.bus, '');
+    addRow('META', 'SOURCE_B_ENV',   '', '', '', '', '', payload.meta.sourceB.env, '');
+    if (payload.meta.sourceB.description)
+      addRow('META', 'SOURCE_B_DESCRIPTION', '', '', '', '', '', payload.meta.sourceB.description, '');
+  }
+
+  // ── SUMMARY: counts per status. Mirrors the headline categories so the
+  //    user can answer "how big is the divergence?" without scrolling.
+  if (payload.diff) {
+    const c = countBoth(payload.diff.both.rows);
+    const total = c.equal + c.diff + c.typediff + c.onlyA + c.onlyB;
+    addRow('SUMMARY', 'TYPE_MISMATCH', 3, '', '', '', c.typediff, '', '');
+    addRow('SUMMARY', 'ONLY_IN_A',     2, '', '', '', c.onlyA,    '', '');
+    addRow('SUMMARY', 'ONLY_IN_B',     2, '', '', '', c.onlyB,    '', '');
+    addRow('SUMMARY', 'VALUE_DIFFERS', 1, '', '', '', c.diff,     '', '');
+    addRow('SUMMARY', 'MATCH',         0, '', '', '', c.equal,    '', '');
+    addRow('SUMMARY', 'TOTAL_PATHS',   '', '', '', '', total,     '', '');
+  }
+
+  // ── FIELD_MAPPING: structural lens. Every path the union of both sides
+  //    knows about. Type columns are populated, value columns are blank
+  //    here — the goal is to make field presence/typing instantly scannable.
+  if (payload.diff?.structure) {
+    for (const r of sortStructByImpact(payload.diff.structure.rows)) {
+      const status   = STRUCT_STATUS[r.kind] || r.kind;
+      const severity = STRUCT_SEVERITY[r.kind] ?? '';
+      const typeA    = r.kind === 'onlyB' ? '' : (r.a === '—' ? '' : r.a);
+      const typeB    = r.kind === 'onlyA' ? '' : (r.b === '—' ? '' : r.b);
+      addRow('FIELD_MAPPING', status, severity, r.path, typeA, typeB, '', '', '');
+    }
+  }
+
+  // ── VALUE_COMPARISON: value lens. Only paths that exist on BOTH sides
+  //    with the same runtime type — i.e. the paths where comparing the
+  //    actual values is meaningful. TYPE_MISMATCH / ONLY_IN_* paths are
+  //    intentionally excluded here; they're already covered by FIELD_MAPPING.
+  if (payload.diff?.both) {
+    const valRows = payload.diff.both.rows
+      .filter((r) => r.kind === 'equal' || r.kind === 'diff');
+    for (const r of sortByImpact(valRows)) {
+      addRow('VALUE_COMPARISON',
+             KIND_STATUS[r.kind] || r.kind,
+             KIND_SEVERITY[r.kind] ?? '',
+             r.path,
+             tOf(r.a), tOf(r.b),
+             r.a,      r.b,
+             '');
+    }
+  }
+
+  // ── PAIR rows: one row per (pair, path) for matched correlation keys.
+  //    Keeps the combined view (structure + values) so an investigator can
+  //    drill into a specific game / event without cross-referencing tabs.
+  for (const pair of payload.pairs) {
+    for (const r of sortByImpact(pair.diff.both.rows)) addDiffRow('PAIR', r, pair.key);
+  }
+
+  downloadBlob(`${exportFilenameBase()}.csv`, rows.join('\n') + '\n', 'text/csv');
+}
+
+// ── Markdown report export ──────────────────────────────────
+function exportReport() {
+  closeExportMenu();
+  const payload = buildExportPayload();
+  const md = renderMarkdownReport(payload);
+  downloadBlob(`${exportFilenameBase()}.md`, md, 'text/markdown');
+}
+
+function mdEscape(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .replace(/\r?\n/g, ' ')
+    .replace(/`/g, '\\`');
+}
+
+function mdValue(v) {
+  if (v == null) return '_—_';
+  if (typeof v === 'object') {
+    let s; try { s = JSON.stringify(v); } catch { s = String(v); }
+    if (s.length > 160) s = s.slice(0, 160) + '…';
+    return '`' + mdEscape(s) + '`';
+  }
+  let s = String(v);
+  if (s.length > 160) s = s.slice(0, 160) + '…';
+  return '`' + mdEscape(s) + '`';
+}
+
+function mdType(v) {
+  if (v === '—' || v == null) return '`—`';
+  return '`' + (Array.isArray(v) ? 'array' : (v === null ? 'null' : typeof v === 'object' ? 'object' : typeof v)) + '`';
+}
+
+function renderMarkdownReport(p) {
+  const out = [];
+  const push = (...lines) => { for (const l of lines) out.push(l); };
+  const hr   = () => push('', '---', '');
+
+  // ── Header
+  push(
+    '# Topic Comparison Report',
+    '',
+    `> **Generated** \`${p.meta.exportedAt}\`  `,
+    `> **Correlation key** \`${p.meta.correlationKey || '—'}\`  `,
+    `> **Matched pairs** ${p.meta.counts.matched}`,
+    ''
+  );
+  hr();
+
+  // ── Executive verdict
+  if (p.diff) {
+    const counts = countBoth(p.diff.both.rows);
+    const total  = counts.equal + counts.diff + counts.typediff + counts.onlyA + counts.onlyB;
+    const pct    = p.diff.structure.matchPct;
+    const verdict =
+      pct >= 95 ? '✅ Schemas align'
+    : pct >= 75 ? '⚠ Schemas mostly align'
+    :             '❌ Significant schema divergence';
+
+    push(
+      `## ${verdict}`,
+      '',
+      `Source A and Source B share **${pct}%** of their schemas ` +
+      `(${p.diff.structure.nMatch} of ${p.diff.structure.total} unique paths match by name **and** type).`,
+      '',
+      '```',
+      `${progressBar(pct)}  ${pct}%`,
+      '```',
+      '',
+      '### At a glance',
+      '',
+      '| Outcome | Count | What it means |',
+      '|---|---:|---|',
+      `| ✅ Match           | **${counts.equal}**   | Same path · same type · same value |`,
+      `| ≈ Value differs   | **${counts.diff}**    | Same path & type — different runtime value |`,
+      `| ⚠ Type mismatch   | **${counts.typediff}**| Same path — different runtime type |`,
+      `| ◧ Only in A       | **${counts.onlyA}**   | Path present on A, absent on B |`,
+      `| ◨ Only in B       | **${counts.onlyB}**   | Path present on B, absent on A |`,
+      `| **Total paths**    | **${total}** | Union of every path on either side |`,
+      ''
+    );
+  } else {
+    push('## Verdict', '', '_No messages on one or both sides yet — nothing to diff._', '');
+  }
+  hr();
+
+  // ── Sources side-by-side
+  const sa = p.meta.sourceA || {};
+  const sb = p.meta.sourceB || {};
+  push(
+    '## Sources',
+    '',
+    '|                       | Source A | Source B |',
+    '|-----------------------|----------|----------|',
+    `| **Bus**               | \`${sa.bus || '—'}\` | \`${sb.bus || '—'}\` |`,
+    `| **Environment**       | \`${sa.env || '—'}\` | \`${sb.env || '—'}\` |`,
+    `| **Topic**             | \`${sa.topic || '—'}\` | \`${sb.topic || '—'}\` |`,
+    `| **Messages received** | ${p.meta.counts.a} | ${p.meta.counts.b} |`,
+    `| **Description**       | ${mdEscape(sa.description || '—')} | ${mdEscape(sb.description || '—')} |`,
+    ''
+  );
+  hr();
+
+  // ── Field mapping — the heart of the report
+  if (p.diff) {
+    const rows = p.diff.both.rows;
+    const tm = rows.filter((r) => r.kind === 'typediff');
+    const vd = rows.filter((r) => r.kind === 'diff');
+    const oa = rows.filter((r) => r.kind === 'onlyA');
+    const ob = rows.filter((r) => r.kind === 'onlyB');
+    const eq = rows.filter((r) => r.kind === 'equal');
+
+    push(
+      '## Field mapping (latest snapshot)',
+      '',
+      'Every field path from either side, grouped by outcome. ' +
+      'Loudest categories come first; matches are collapsed at the bottom.',
+      ''
+    );
+
+    // ⚠ Type mismatches — highest signal
+    push(`### ⚠ Type mismatches — ${tm.length}`, '');
+    if (!tm.length) {
+      push('_None — every shared path has the same runtime type._', '');
+    } else {
+      push(
+        'Same path on both sides, but the runtime types disagree.',
+        '',
+        '| Path | Type A | Type B | Value A | Value B |',
+        '|---|---|---|---|---|'
+      );
+      for (const r of tm) push(`| \`${mdEscape(r.path)}\` | ${mdType(r.a)} | ${mdType(r.b)} | ${mdValue(r.a)} | ${mdValue(r.b)} |`);
+      push('');
+    }
+
+    // ≈ Value differences
+    push(`### ≈ Value differences — ${vd.length}`, '');
+    if (!vd.length) {
+      push('_None — every shared path with matching type also has matching value._', '');
+    } else {
+      push(
+        'Same path **and** type on both sides — but the runtime values disagree.',
+        '',
+        '| Path | Value A | Value B |',
+        '|---|---|---|'
+      );
+      for (const r of vd) push(`| \`${mdEscape(r.path)}\` | ${mdValue(r.a)} | ${mdValue(r.b)} |`);
+      push('');
+    }
+
+    // ◧ Only in A
+    push(`### ◧ Only in Source A — ${oa.length}`, '');
+    if (!oa.length) {
+      push('_None — every path on A is also on B._', '');
+    } else {
+      push(
+        'These fields ship on A but never appear on B (might be A-specific enrichment or B-specific drops).',
+        '',
+        '| Path | Type | Sample value |',
+        '|---|---|---|'
+      );
+      for (const r of oa) push(`| \`${mdEscape(r.path)}\` | ${mdType(r.a)} | ${mdValue(r.a)} |`);
+      push('');
+    }
+
+    // ◨ Only in B
+    push(`### ◨ Only in Source B — ${ob.length}`, '');
+    if (!ob.length) {
+      push('_None — every path on B is also on A._', '');
+    } else {
+      push(
+        'These fields ship on B but never appear on A.',
+        '',
+        '| Path | Type | Sample value |',
+        '|---|---|---|'
+      );
+      for (const r of ob) push(`| \`${mdEscape(r.path)}\` | ${mdType(r.b)} | ${mdValue(r.b)} |`);
+      push('');
+    }
+
+    // ✅ Matches — collapsed by default to keep the report scannable
+    push(`### ✅ Matches — ${eq.length}`, '');
+    if (!eq.length) {
+      push('_None — no path is fully identical on both sides._', '');
+    } else {
+      push(
+        'Paths with identical name, type, **and** value on both sides.',
+        '',
+        '<details>',
+        `<summary>Click to expand all ${eq.length} matching fields</summary>`,
+        '',
+        '| Path | Type | Value |',
+        '|---|---|---|'
+      );
+      for (const r of eq) push(`| \`${mdEscape(r.path)}\` | ${mdType(r.a)} | ${mdValue(r.a)} |`);
+      push('', '</details>', '');
+    }
+    hr();
+  }
+
+  // ── Matched pairs
+  push(`## Matched pairs — ${p.pairs.length}`, '');
+  if (!p.pairs.length) {
+    push('_No pairs yet — appears when both sides emit a message sharing the same correlation key value._', '');
+  } else {
+    push(
+      'Each pair correlates one message from A with one from B (same value of the correlation key).',
+      ''
+    );
+    for (const pair of p.pairs) {
+      const c = countBoth(pair.diff.both.rows);
+      const total = c.equal + c.diff + c.typediff + c.onlyA + c.onlyB;
+      const s = pair.diff.structure;
+      const tag = s.matchPct >= 95 ? '✅' : s.matchPct >= 75 ? '⚠' : '❌';
+
+      push(
+        `### ${tag} Pair \`${mdEscape(pair.key)}\` — ${s.matchPct}% schema match`,
+        '',
+        `- **A timestamp** \`${pair.a.ts}\``,
+        `- **B timestamp** \`${pair.b.ts}\``,
+        '',
+        '| ✅ Match | ≈ Differs | ⚠ Type ≠ | ◧ A only | ◨ B only | Total |',
+        '|---:|---:|---:|---:|---:|---:|',
+        `| ${c.equal} | ${c.diff} | ${c.typediff} | ${c.onlyA} | ${c.onlyB} | ${total} |`,
+        ''
+      );
+
+      const issues = sortByImpact(pair.diff.both.rows.filter((r) => r.kind !== 'equal'));
+      if (!issues.length) {
+        push('_Fully equivalent — no differences for this pair._', '');
+      } else {
+        push(
+          '| Path | Status | Value A | Value B |',
+          '|---|---|---|---|'
+        );
+        for (const r of issues) {
+          push(`| \`${mdEscape(r.path)}\` | ${KIND_LABEL[r.kind] || r.kind} | ${mdValue(r.a)} | ${mdValue(r.b)} |`);
+        }
+        push('');
+      }
+    }
+  }
+  hr();
+
+  // ── JSON snapshots
+  push('## Snapshots', '');
+  if (p.latest.a != null) {
+    push('### Source A (latest decoded message)', '', '```json', safeJson(p.latest.a), '```', '');
+  }
+  if (p.latest.b != null) {
+    push('### Source B (latest decoded message)', '', '```json', safeJson(p.latest.b), '```', '');
+  }
+  hr();
+
+  // ── Legend (so anyone opening the report cold can interpret it)
+  push(
+    '## Legend',
+    '',
+    '| Symbol | Status        | Meaning |',
+    '|--------|---------------|---------|',
+    '| ✅ | `MATCH`         | Same path, same type, same value on both sides |',
+    '| ≈ | `VALUE_DIFFERS` | Same path & type — different value at runtime |',
+    '| ⚠ | `TYPE_MISMATCH` | Same path — different JS runtime type |',
+    '| ◧ | `ONLY_IN_A`     | Path only present in Source A |',
+    '| ◨ | `ONLY_IN_B`     | Path only present in Source B |',
+    '',
+    '**Schema match %** counts only how many paths share both name and runtime type ' +
+    '(value differences do not reduce it). Use the Matches column to see deeper agreement.',
+    ''
+  );
+  hr();
+
+  // ── Appendix
+  push(
+    '## Appendix — full machine-readable export',
+    '',
+    'Equivalent to the `Export → JSON (full)` option. Use this for downstream tooling.',
+    '',
+    '```json',
+    safeJson(p),
+    '```',
+    ''
+  );
+
+  return out.join('\n');
+}
+
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+window.addEventListener('beforeunload', () => stopCompare());
+</script>
+</body>
+</html>

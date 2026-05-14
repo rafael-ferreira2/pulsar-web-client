@@ -1,0 +1,21 @@
+#!/bin/sh
+# Copy to tokens.sh, fill in values, then:  source tokens.sh && npm start
+# Never commit tokens.sh.
+
+# ── Pulsar (StreamNative JWTs) ─────────────────────────────────────────────
+export PULSAR_STG_GAMESTATE=""
+export PULSAR_STG_MAPPINGS=""
+export PULSAR_STG_COMP_STATS=""
+export PULSAR_STG_FIXTURE_STATS=""
+
+export PULSAR_PRD_GAMESTATE=""
+export PULSAR_PRD_MAPPINGS=""
+export PULSAR_PRD_COMP_STATS=""
+export PULSAR_PRD_FIXTURE_STATS=""
+
+# ── Kafka — Confluent Cloud ONLY (prematch topics; see kafka-config.json) ──
+# MSK + MFSL clusters need no env vars. Uncomment when you have Confluent keys:
+# export KAFKA_STG_CONFLUENT_API_KEY=""
+# export KAFKA_STG_CONFLUENT_API_SECRET=""
+# export KAFKA_PRD_CONFLUENT_API_KEY=""
+# export KAFKA_PRD_CONFLUENT_API_SECRET=""

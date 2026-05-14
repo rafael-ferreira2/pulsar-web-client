@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.stat;
+
+import "game_state_api_outbound_sport_soccer.proto";
+
+message Stats {
+
+    repeated Stat match_stat = 1;
+    repeated PeriodStat period_stat = 2;
+    repeated Stat participant_stat = 3;
+
+    message Stat {
+        string participant_ref = 1;
+        SportStatType type = 2;
+        double value = 3;
+
+        message SportStatType {
+            oneof sport_stat_type {
+                com.ppb.gamestate.api.outbound.sport.soccer.SoccerStatType soccer_stat_type = 1;
+            }
+        }
+    }
+
+    message PeriodStat {
+        Period period = 1;
+        Stat stat = 2;
+
+        message Period {
+            oneof period {
+                com.ppb.gamestate.api.outbound.sport.soccer.SoccerPeriod soccer_period = 2;
+            }
+        }
+    }
+
+}

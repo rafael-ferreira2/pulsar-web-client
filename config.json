@@ -1,0 +1,84 @@
+{
+  "environments": [
+    {
+      "id": "staging",
+      "name": "Staging",
+      "brokerUrl": "pulsar+ssl://pc-24d7b75e.gcd.dts.use2.flutterpsn.com:6651",
+      "topics": [
+        {
+          "id": "gamestate",
+          "label": "Soccer live gamestate",
+          "topic": "persistent://gcd/soccer-inbound/game-state",
+          "keyName": "soccer-gamestate-api-key-trading-soccer-prd-sgt-fd-use2-stg",
+          "tokenEnvVar": "PULSAR_STG_GAMESTATE",
+          "schema": "gamestate_api",
+          "description": "Live soccer game-state updates published by GCD into Pulsar (use2). Mirrored from Trading's MSK Kafka topic `trading.soccer.nxt.sgt` (staging) by the GCD Kafka→Pulsar sink connector. Payload: protobuf (`GameStateOutbound.Api`)."
+        },
+        {
+          "id": "mappings",
+          "label": "Live mappings",
+          "topic": "persistent://gcd/livedata-inbound/livedata-mappings",
+          "keyName": "ldm-api-key-livedata-mappings-fd-use2-stg",
+          "tokenEnvVar": "PULSAR_STG_MAPPINGS",
+          "description": "Live ID/RAMP mapping events between sportsbook IDs and provider IDs. Mirrored from MFSL UKI Kafka `livedata.mappings`. Payload: protobuf (`MappingDeserializer`); may surface as hex / lossy UTF-8 here until the mapping `.proto` is bundled."
+        },
+        {
+          "id": "comp_stats",
+          "label": "Competition pre-match stats",
+          "topic": "persistent://gcd/soccer-inbound/competition-prematch-stats",
+          "keyName": "csps-api-key-trading-comp-soccer-pm-stats-fd-use2-stg",
+          "tokenEnvVar": "PULSAR_STG_COMP_STATS",
+          "description": "Competition-level (league / tournament) pre-match statistics for soccer. Mirrored from Confluent Cloud `trading.nxt.competition.soccer.prematch.stats` (staging). Payload: JSON with optional non-JSON byte prefix."
+        },
+        {
+          "id": "fixture_stats",
+          "label": "Fixture pre-match stats",
+          "topic": "persistent://gcd/soccer-inbound/fixture-prematch-stats",
+          "keyName": "fsps-api-key-trading-fixture-soccer-prematch-stats-fd-use2-stg",
+          "tokenEnvVar": "PULSAR_STG_FIXTURE_STATS",
+          "description": "Fixture-level (per-match) pre-match statistics for soccer. Mirrored from Confluent Cloud `trading.nxt.fixture.soccer.prematch.stats` (staging). Payload: JSON."
+        }
+      ]
+    },
+    {
+      "id": "production",
+      "name": "Production",
+      "brokerUrl": "pulsar+ssl://pc-a62b5405.gcd.prd.use2.flutterpsn.com:6651",
+      "topics": [
+        {
+          "id": "gamestate",
+          "label": "Soccer live gamestate",
+          "topic": "persistent://gcd/soccer-inbound/game-state",
+          "keyName": "tsps-api-key-trading-soccer-prd-sgt-fd-use2-prod",
+          "tokenEnvVar": "PULSAR_PRD_GAMESTATE",
+          "schema": "gamestate_api",
+          "description": "Production soccer game-state stream — mirrored from Trading's MSK Kafka topic `trading.soccer.prd.sgt` by the GCD Kafka→Pulsar sink connector. Payload: protobuf (`GameStateOutbound.Api`)."
+        },
+        {
+          "id": "mappings",
+          "label": "Live mappings",
+          "topic": "persistent://gcd/livedata-inbound/livedata-mappings",
+          "keyName": "ldm-api-key-livedata-mappings-fd-use2-prod",
+          "tokenEnvVar": "PULSAR_PRD_MAPPINGS",
+          "description": "Production live ID/RAMP mapping events. Mirrored from MFSL UKI `livedata.mappings`. Payload: protobuf (`MappingDeserializer`)."
+        },
+        {
+          "id": "comp_stats",
+          "label": "Competition pre-match stats",
+          "topic": "persistent://gcd/soccer-inbound/competition-prematch-stats",
+          "keyName": "csps-api-key-trading-comp-soccer-pre-stats-fd-use2-prod",
+          "tokenEnvVar": "PULSAR_PRD_COMP_STATS",
+          "description": "Production competition-level pre-match statistics. Mirrored from Confluent Cloud `trading.competition.soccer.prematch.stats`. Payload: JSON."
+        },
+        {
+          "id": "fixture_stats",
+          "label": "Fixture pre-match stats",
+          "topic": "persistent://gcd/soccer-inbound/fixture-prematch-stats",
+          "keyName": "fsps-api-key-trading-fix-soccer-pre-stats-fd-use2-prod",
+          "tokenEnvVar": "PULSAR_PRD_FIXTURE_STATS",
+          "description": "Production fixture-level pre-match statistics. Mirrored from Confluent Cloud `trading.fixture.soccer.prematch.stats`. Payload: JSON."
+        }
+      ]
+    }
+  ]
+}

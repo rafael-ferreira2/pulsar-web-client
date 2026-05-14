@@ -1,0 +1,185 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.sport.soccer;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+message SoccerAttributes {
+    string home_participant_ref = 1;
+    string away_participant_ref = 2;
+    SoccerAttributesFirstLegScore first_leg_score = 3;
+    string penalty_shootout_format = 4;
+    SoccerAttributesMatchType match_type = 5;
+
+    message SoccerAttributesFirstLegScore {
+        int32 home_participant = 1;
+        int32 away_participant = 2;
+    }
+
+    enum SoccerAttributesMatchType {
+        NINETY_MINUTES_ONLY = 0;
+        FIRST_LEG = 1;
+        SINGLE_KNOCKOUT = 2;
+        SECOND_LEG_KNOCKOUT_WITH_AWAY_GOALS = 3;
+        SECOND_LEG_KNOCKOUT_NO_AWAY_GOALS = 4;
+        UNKNOWN_MATCH_TYPE = 9999;
+    }
+}
+
+enum SoccerIncidentType {
+    reserved 3;
+    reserved 24;
+    reserved "OWN_GOAL";
+    UNCONFIRMED_SHOT = 0;
+    SHOT_OFF_TARGET = 1;
+    SHOT_SAVED = 2;
+    GOAL = 4;
+    DANGEROUS_ATTACK = 5;
+    THROW_IN = 6;
+    FREE_KICK = 7;
+    GOAL_KICK = 8;
+    CORNER = 9;
+    YELLOW_CARD = 10;
+    SUBSTITUTION = 11;
+    PENALTY_SHOOTOUT = 12;
+    PENALTY_MISSED = 13;
+    PENALTY_AWARDED = 14;
+    CANCELLED = 15;
+    PERIOD_TRANSITION = 16;
+    INJURY_TIME_UPDATE = 17;
+    TEAM_TO_TAKE_FIRST_PENALTY = 18;
+    POSSIBLE_GOAL = 19;
+    RED_CARD = 20;
+    YELLOW_RED_CARD = 21;
+    OFFSIDE = 22;
+    FOUL = 23;
+    GOALKEEPER_SAVE = 25;
+    TACKLE_WON = 26;
+    INTERCEPTION = 27;
+    HIT_WOODWORK = 28;
+    UNKNOWN_INCIDENT_TYPE = 9999;
+}
+
+message SoccerIncidentTime {
+    SoccerPeriod period = 1;
+    Clock clock = 2;
+    google.protobuf.Timestamp actual_time = 3;
+
+    message Clock {
+        uint32 minutes = 1;
+        uint32 seconds = 2;
+    }
+}
+
+enum SoccerPeriod {
+    PRE_MATCH = 0;
+    FIRST_HALF = 1;
+    HALF_TIME = 2;
+    SECOND_HALF = 3;
+    END_OF_NORMAL_TIME = 4;
+    EXTRA_TIME_FIRST_HALF = 5;
+    EXTRA_TIME_HALF_TIME = 6;
+    EXTRA_TIME_SECOND_HALF = 7;
+    END_OF_EXTRA_TIME = 8;
+    PENALTIES = 9;
+    END_OF_MATCH = 10;
+    UNKNOWN_SOCCER_PERIOD = 9999;
+}
+
+message FoulWonDetails {
+    // flag that identifies if it is known whether or not a player foul won is to be awarded
+    bool player_foul_won_awaiting_confirmation = 1;
+    // flag that identifies if the committed foul awards a foul won to a player
+    // the flag will not be available when the previous flag is set to true
+    google.protobuf.BoolValue player_foul_won = 2;
+    // identifies the id of the player who won the foul, iff player_foul_won == true and
+    // player_foul_won_awaiting_confirmation == false
+    google.protobuf.StringValue player_id = 3;
+}
+
+message QualifierDetails {
+    oneof details {
+        FoulWonDetails foul_won_details = 1;
+    }
+}
+
+message SoccerIncidentQualifiers {
+    repeated SoccerIncidentQualifier qualifiers = 1;
+
+    message SoccerIncidentQualifier {
+        SoccerQualifier qualifier = 1;
+        string value = 2;
+        QualifierDetails details = 3;
+
+        enum SoccerQualifier {
+            ASSISTANT_PARTICIPANT_REF = 0;
+            OUT_PARTICIPANT_REF = 1;
+            PENALTY_SCORED = 2;
+            START_OF_FIRST_HALF = 3;
+            END_OF_FIRST_HALF = 4;
+            START_OF_SECOND_HALF = 5;
+            END_OF_SECOND_HALF = 6;
+            START_OF_EXTRA_TIME_FIRST_HALF = 7;
+            END_OF_EXTRA_TIME_FIRST_HALF = 8;
+            START_OF_EXTRA_TIME_SECOND_HALF = 9;
+            END_OF_EXTRA_TIME_SECOND_HALF = 10;
+            START_OF_PENALTY_SHOOTOUT = 11;
+            END_OF_MATCH = 12;
+            SHOOTOUT_ATTEMPT_STATE = 13;
+            OWN_GOAL = 14;
+            INJURY_TIME_UPDATE = 15;
+            BLOCKED_SHOT = 16;
+            NO_ASSIST = 17;
+            // Identifies that a foul has been won. If the value is defined it identifies the id
+            // of the player that won the foul
+            FOUL_WON = 18;
+            POSSIBLE = 19;
+            OFFSIDE = 20;
+            INSIDE_BOX = 21;
+            OUTSIDE_BOX = 22;
+            HEADER = 23;
+            LEFT_FOOT = 24;
+            RIGHT_FOOT = 25;
+            UNKNOWN_SOCCER_QUALIFIER = 9999;
+        }
+    }
+}
+
+message SoccerTeamAttributes {
+    string jersey_colour = 1;
+    google.protobuf.StringValue formation = 2;
+}
+
+message SoccerPlayerAttributes {
+    string parent_participant_ref = 1;
+    SoccerPlayerStartingPositionType starting_position = 2;
+    int32 shirt_number = 3;
+    string position = 4;
+    SoccerPlayerPosition playerPosition = 5;
+    google.protobuf.StringValue formation_place = 6;
+
+    enum SoccerPlayerPosition {
+        UNKNOWN_POSITION = 0;
+        DEFENDER = 1;
+        MIDFIELDER = 2;
+        GOALKEEPER = 3;
+        FORWARD = 4;
+    }
+
+    enum SoccerPlayerStartingPositionType {
+        UNKNOWN = 0;
+        STARTING_ELEVEN = 1;
+        BENCH = 2;
+    }
+}
+
+enum SoccerStatType {
+    UNKNOWN = 0;
+    BALL_POSSESSION = 1;
+    GOALS = 2;
+    YELLOW_CARDS = 3;
+    PASSES = 4;
+    ATTACKS = 5;
+    DANGEROUS_ATTACKS = 6;
+}

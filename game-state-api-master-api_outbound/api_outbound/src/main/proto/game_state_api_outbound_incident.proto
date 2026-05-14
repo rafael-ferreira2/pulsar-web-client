@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.incident;
+
+import "google/protobuf/timestamp.proto";
+
+import "game_state_api_outbound_common.proto";
+import "game_state_api_outbound_sport_soccer.proto";
+import "game_state_api_outbound_sport_horseracing.proto";
+import "game_state_api_outbound_sport_tennis.proto";
+
+message Incident {
+    uint32 version = 8;
+    string id = 1;
+    IncidentType type = 2;
+    repeated string participant_ref = 3;
+    repeated com.ppb.gamestate.api.outbound.common.ExternalRef external_ref = 4;
+    IncidentTime time = 5;
+    IncidentQualifiers qualifiers = 6;
+    google.protobuf.Timestamp last_modified = 7;
+
+    message IncidentType {
+        oneof sport_incident_type {
+            com.ppb.gamestate.api.outbound.sport.soccer.SoccerIncidentType soccer_incident_type = 1;
+            com.ppb.gamestate.api.outbound.sport.horseracing.HorseRacingIncidentType horseracing_incident_type = 2;
+            com.ppb.gamestate.api.outbound.sport.tennis.TennisIncidentType tennis_incident_type = 3;
+        }
+    }
+
+    message IncidentTime {
+        oneof incident_time {
+            com.ppb.gamestate.api.outbound.sport.soccer.SoccerIncidentTime soccer_incident_time = 1;
+            com.ppb.gamestate.api.outbound.sport.horseracing.HorseRacingIncidentTime horseracing_incident_time = 2;
+            com.ppb.gamestate.api.outbound.sport.tennis.TennisIncidentTime tennis_incident_time = 3;
+        }
+    }
+
+    message IncidentQualifiers {
+        oneof incident_qualifiers {
+            com.ppb.gamestate.api.outbound.sport.soccer.SoccerIncidentQualifiers soccer_incident_qualifiers = 1;
+            com.ppb.gamestate.api.outbound.sport.horseracing.HorseRacingIncidentQualifiers horseracing_incident_qualifiers = 2;
+            com.ppb.gamestate.api.outbound.sport.tennis.TennisIncidentQualifiers tennis_incident_qualifiers = 3;
+        }
+    }
+}

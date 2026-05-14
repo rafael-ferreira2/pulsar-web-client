@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.sport.horseracing;
+
+import "google/protobuf/timestamp.proto";
+
+enum HorseRacingIncidentType {
+    STATUS_CHANGE = 0;
+}
+
+message HorseRacingIncidentTime {
+    google.protobuf.Timestamp timestamp = 1;
+}
+
+message HorseRacingIncidentQualifiers {
+    repeated HorseRacingIncidentQualifier qualifiers = 1;
+
+    message HorseRacingIncidentQualifier {
+        HorseRacingQualifier qualifier = 1;
+        string value = 2;
+
+        enum HorseRacingQualifier {
+            RACE_STATUS = 0;
+        }
+    }
+}

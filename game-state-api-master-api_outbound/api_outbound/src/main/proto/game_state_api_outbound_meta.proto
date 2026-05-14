@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.meta;
+
+import "google/protobuf/timestamp.proto";
+
+import "game_state_api_outbound_common.proto";
+
+import "game_state_api_outbound_incident.proto";
+
+import "game_state_api_outbound_stats.proto";
+
+message Meta {
+    string version = 1;
+    string game_state_id = 2;
+    uint32 high_water_mark = 3;
+    string game_state_previous_id = 4;
+    string ingress_correlation_id = 5;
+    InstructionType instruction_type = 6;
+    Sport sport = 7;
+    repeated FeedStatus feedStatus = 8;
+    uint64 collector_in_ms = 10;
+    uint64 collector_out_ms = 11;
+    uint64 aggregator_in_ms = 12;
+    uint64 aggregator_out_ms = 13;
+    string ingress_correlation_timestamp = 14;
+
+    map<string, string> headers = 9;
+
+    message FeedStatus {
+        com.ppb.gamestate.api.outbound.common.Provider provider = 1;
+        Status status = 2;
+        FeedFeatures features = 3;
+
+        enum Status {
+            MAPPED = 0;
+            DISCONNECT = 1;
+            FINISHED_IN_RUNNING = 2;
+        }
+    }
+
+    message FeedFeatures {
+        repeated com.ppb.gamestate.api.outbound.incident.Incident.IncidentType supported_incident_types = 1;
+        repeated com.ppb.gamestate.api.outbound.stat.Stats.Stat.SportStatType supported_stat_types = 2;
+    }
+
+    enum Sport {
+        SOCCER = 0;
+        HORSE_RACING = 1;
+        TENNIS = 2;
+    }
+
+    enum InstructionType {
+        INCIDENT_UPDATE = 0;
+        FIXTURE_UPDATE = 1;
+        PARTICIPANT_UPDATE = 2;
+        CREATE = 3;
+        FULL_UPDATE = 4;
+    }
+}

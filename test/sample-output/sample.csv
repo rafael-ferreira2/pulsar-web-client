@@ -1,0 +1,41 @@
+Section,Status,Severity,Path,Type [game-state],Type [trading.soccer.nxt.sgt],Value [game-state],Value [trading.soccer.nxt.sgt],Pair Key
+META,SOURCE_A_TOPIC,,,,,persistent://gcd/soccer-inbound/game-state,,
+META,SOURCE_B_TOPIC,,,,,,trading.soccer.nxt.sgt,
+META,EXPORTED_AT,,,,,2026-05-14T13:00:02.000Z,,
+META,CORRELATION_KEY,,,,,meta.gameStateId,,
+META,SCHEMA_MATCH_PCT,,,,,50,,
+META,MATCHED_PAIRS,,,,,1,,
+META,MESSAGES_A,,,,,3,,
+META,MESSAGES_B,,,,,,3,
+META,SOURCE_A_BUS,,,,,pulsar,,
+META,SOURCE_A_ENV,,,,,staging,,
+META,SOURCE_A_DESCRIPTION,,,,,Pulsar staging soccer gamestate (rendered output).,,
+META,SOURCE_B_BUS,,,,,,kafka,
+META,SOURCE_B_ENV,,,,,,kafka-stg,
+META,SOURCE_B_DESCRIPTION,,,,,,GCD source Kafka topic on UKI MSK.,
+SUMMARY,TYPE_MISMATCH,3,,,,1,,
+SUMMARY,ONLY_IN_A,2,,,,2,,
+SUMMARY,ONLY_IN_B,2,,,,1,,
+SUMMARY,VALUE_DIFFERS,1,,,,1,,
+SUMMARY,MATCH,0,,,,3,,
+SUMMARY,TOTAL_PATHS,,,,,8,,
+FIELD_MAPPING,TYPE_MISMATCH,3,meta.fixtureId,string,number,,,
+FIELD_MAPPING,ONLY_IN_B,2,kafkaOffset,,number,,,
+FIELD_MAPPING,ONLY_IN_A,2,meta.region,string,,,,
+FIELD_MAPPING,ONLY_IN_A,2,pulsarTimestamp,number,,,,
+FIELD_MAPPING,TYPE_MATCH,0,meta.gameStateId,string,string,,,
+FIELD_MAPPING,TYPE_MATCH,0,score.away,number,number,,,
+FIELD_MAPPING,TYPE_MATCH,0,score.home,number,number,,,
+FIELD_MAPPING,TYPE_MATCH,0,status,string,string,,,
+VALUE_COMPARISON,VALUE_DIFFERS,1,score.home,number,number,1,0,
+VALUE_COMPARISON,MATCH,0,meta.gameStateId,string,string,g-42,g-42,
+VALUE_COMPARISON,MATCH,0,score.away,number,number,0,0,
+VALUE_COMPARISON,MATCH,0,status,string,string,LIVE,LIVE,
+PAIR,TYPE_MISMATCH,3,meta.fixtureId,string,number,99,99,g-42
+PAIR,ONLY_IN_B,2,kafkaOffset,,number,,17,g-42
+PAIR,ONLY_IN_A,2,meta.region,string,,EU,,g-42
+PAIR,ONLY_IN_A,2,pulsarTimestamp,number,,1715587200000,,g-42
+PAIR,VALUE_DIFFERS,1,score.home,number,number,1,0,g-42
+PAIR,MATCH,0,meta.gameStateId,string,string,g-42,g-42,g-42
+PAIR,MATCH,0,score.away,number,number,0,0,g-42
+PAIR,MATCH,0,status,string,string,LIVE,LIVE,g-42

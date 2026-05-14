@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.sport.tennis;
+
+import "game_state_api_outbound_common.proto";
+import "google/protobuf/timestamp.proto";
+
+message TennisAttributes {
+    MatchType match_type = 1;
+    string surface = 2;
+    Gender participant_gender = 3;
+    string tournament_type = 4;
+    int32 number_of_sets = 5;
+    LastSetFormat last_set_format = 6;
+    com.ppb.gamestate.api.outbound.common.BooleanValue advantage_played_normal_game = 7;
+    com.ppb.gamestate.api.outbound.common.BooleanValue advantage_played_tie_break_game = 8;
+    int32 games_in_set_first_to = 9;
+    int32 tie_break_played_after_x_games = 10;
+    int32 points_in_tie_break_first_to = 11;
+    int32 points_in_race_set_first_to = 12;
+    string start_of_match_server_ref = 13;
+    int32 current_serve_number = 14;
+    Gender next_point_server_gender = 15;
+    int32 current_set = 16;
+    int32 current_game = 17;
+    repeated Competition competition = 18;
+    com.ppb.gamestate.api.outbound.common.BooleanValue in_tie_break = 19;
+    string match_current_score = 20;
+    string current_server_ref = 21;
+    string team_a_current_game_score = 22;
+    string team_b_current_game_score = 23;
+}
+
+message TennisTeamAttributes {
+    int32 rank = 1;
+    string participant_key = 2;
+}
+
+enum MatchType {
+    UNKNOWN_MATCH_TYPE = 0;
+    DOUBLES = 1;
+    SINGLES = 2;
+}
+
+enum LastSetFormat {
+    UNKNOWN_LAST_SET_FORMAT = 0;
+    AUSTRALIAN_OPEN = 1;
+    RACE_SET= 2;
+    ADVANTAGE_SET = 3;
+    WIMBLEDON_TIEBREAK = 4;
+    TIEBREAK_TENS = 5;
+    NORMAL_WITH_TIEBREAK = 6;
+}
+
+enum Gender {
+    UNKNOWN_GENDER = 0;
+    MALE = 1;
+    FEMALE = 2;
+    MIXED = 3;
+}
+
+enum TennisIncidentType {
+    UNKNOWN_INCIDENT = 0;
+    POINT_ACE = 1;
+    POINT_DOUBLE_FAULT = 2;
+    POINT_PENALTY = 3;
+    POINT_OTHER = 4;
+    POINT_UNKNOWN = 5;
+    RAIN_DELAY = 6;
+    MATCH_RESUMED = 7;
+    ON_COURT_COACHING = 8;
+    TOILET_BREAK = 9;
+    HEAT_DELAY = 10;
+    SIDE_SWAP_SET = 11;
+    SIDE_SWAP_GAME = 12;
+    SIDE_SWAP_TIEBREAK = 13;
+    SET_PERIOD_START = 14;
+    RETIREMENT = 15;
+    POINT_RALLY = 16;
+    SET_START = 17;
+}
+
+message TennisIncidentQualifiers {
+    repeated TennisIncidentQualifier qualifiers = 1;
+
+    message TennisIncidentQualifier {
+        TennisQualifier qualifier = 1;
+        string value = 2;
+        enum TennisQualifier {
+            SERVE_NUMBER = 0;
+            POINT_NUMBER = 1;
+            POINT_WINNER_PARTICIPANT_REF = 2;
+            RETIRED_PARTICIPANT_REF = 3;
+            SET_NUMBER = 4;
+            GAME_NUMBER = 5;
+            TEAM_A_POINTS = 6;
+            TEAM_B_POINTS = 7;
+            TEAM_A_TIE_BREAK_POINTS = 8;
+            TEAM_B_TIE_BREAK_POINTS = 9;
+            TEAM_A_SETS_WON = 10;
+            TEAM_B_SETS_WON = 11;
+            TEAM_A_GAMES_WON = 12;
+            TEAM_B_GAMES_WON = 13;
+            SERVING_PARTICIPANT_REF = 14;
+        }
+    }
+}
+
+message Competition {
+    string competition_id = 1;
+    string competition_name = 2;
+    com.ppb.gamestate.api.outbound.common.Provider provider = 3;
+}
+
+message TennisIncidentTime {
+    google.protobuf.Timestamp timestamp = 1;
+}

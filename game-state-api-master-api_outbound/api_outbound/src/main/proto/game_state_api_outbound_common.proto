@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.common;
+
+enum Provider {
+    OPTA = 0;
+    RAMP = 1;
+    SPORTEX = 2;
+    SOCCER_HUB = 3;
+    UPI = 4;
+    AMELCO = 5;
+    IMG = 6;
+    BETRADAR = 7;
+    UNKNOWN_PROVIDER = 8;
+    AMELCO_MANUAL = 9;
+    ABELSON = 10;
+}
+
+message ExternalRef {
+    string external_id = 1;
+    com.ppb.gamestate.api.outbound.common.Provider provider = 2;
+}
+
+
+enum BooleanValue {
+    UNKNOWN_BOOL_VALUE = 0;
+    TRUE = 1;
+    FALSE = 2;
+}

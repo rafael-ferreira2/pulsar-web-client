@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FanDuel · GCD Streaming · Listener</title>
+  <meta name="theme-color" content="#1493FF">
+  <meta name="description" content="FanDuel internal — live diagnostics for the GCD Pulsar and Kafka topics.">
+  <link rel="icon" type="image/png" sizes="any" href="/fanduel-shield.png">
+  <link rel="apple-touch-icon" href="/fanduel-shield.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/shared.css">
+  <style>
+    /* ── Page layout ────────────────────────────────────── */
+    body { display: flex; flex-direction: column; }
+    #shell { flex: 1; display: flex; min-height: 0; }
+
+    /* ── Sidebar ────────────────────────────────────────── */
+    #sidebar {
+      width: 250px; background: var(--bg-elev);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .sidebar-section { padding: 14px 12px 6px; flex-shrink: 0; }
+    .sidebar-section-label {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 6px 8px;
+      font-size: 10px; font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+    .sidebar-section-label svg { width: 12px; height: 12px; }
+
+    /* Bus mode pill switch */
+    .bus-switch {
+      display: inline-flex; padding: 3px; gap: 2px;
+      background: var(--bg-elev-2); border: 1px solid var(--border);
+      border-radius: 8px; width: 100%;
+    }
+    .bus-btn {
+      flex: 1; padding: 6px 10px; border-radius: 5px;
+      border: none; background: transparent;
+      color: var(--text-muted);
+      font-size: 11.5px; font-weight: 600;
+      cursor: pointer; transition: all .12s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: inherit;
+    }
+    .bus-btn:hover { color: var(--text); }
+    .bus-btn.active {
+      background: var(--bg); color: var(--text);
+      box-shadow: var(--shadow);
+    }
+    .bus-btn.active.bus-pulsar { color: var(--pulsar); }
+    .bus-btn.active.bus-kafka  { color: var(--kafka); }
+    .bus-btn svg { width: 12px; height: 12px; }
+
+    /* Sidebar sort toolbar — env filter chips + topic sort */
+    .topic-toolbar {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 0 6px 8px;
+    }
+    .toolbar-row {
+      display: flex; gap: 6px; align-items: center; width: 100%;
+    }
+    /* Env filter chips (STG / PRD) — pill-style checkbox toggles */
+    .env-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 999px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+      cursor: pointer; user-select: none;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text-dim);
+      transition: all .12s;
+      white-space: nowrap;
+    }
+    .env-chip svg { width: 10px; height: 10px; opacity: .55; transition: opacity .12s; }
+    .env-chip:hover { color: var(--text); border-color: var(--border-strong); }
+    .env-chip input { display: none; }
+    .env-chip.on { color: var(--text); }
+    .env-chip.on svg { opacity: 1; }
+    .env-chip.on[data-type="stg"] {
+      color: var(--warning); border-color: var(--warning);
+      background: rgba(210,153,34,.12);
+    }
+    .env-chip.on[data-type="prd"] {
+      color: var(--success); border-color: var(--success);
+      background: rgba(63,185,80,.12);
+    }
+    .toolbar-row .toolbar-spacer { flex: 1; }
+    .sort-select {
+      flex: 1 1 0; min-width: 0;
+      background: var(--bg-elev-2); border: 1px solid var(--border);
+      color: var(--text); padding: 5px 7px; border-radius: 5px;
+      font-size: 11px; cursor: pointer; font-family: inherit;
+    }
+    .sort-select:focus { outline: none; border-color: var(--primary); }
+    .icon-btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 5px 7px; border-radius: 5px;
+      cursor: pointer; transition: all .12s;
+      font-family: inherit; font-size: 11px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { color: var(--text); background: var(--hover); }
+    .icon-btn svg { width: 12px; height: 12px; }
+
+    /* "No environments visible" placeholder when both filters are off */
+    .env-list-empty {
+      padding: 14px 12px; margin: 0 6px;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      font-size: 11.5px; color: var(--text-muted);
+      text-align: center; line-height: 1.5;
+    }
+
+    /* Env / topic tree */
+    #env-list { flex: 1; overflow-y: auto; padding: 4px 8px 16px; }
+    .env-section { margin-bottom: 8px; }
+    .env-header {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 8px; border-radius: 5px;
+      font-size: 10.5px; font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: .06em;
+      cursor: pointer; user-select: none;
+      transition: background .12s, color .12s;
+    }
+    .env-header:hover { background: var(--hover); color: var(--text); }
+    .env-caret {
+      width: 11px; height: 11px; color: var(--text-dim);
+      flex-shrink: 0;
+      transition: transform .15s;
+    }
+    .env-section.collapsed .env-caret { transform: rotate(-90deg); }
+    .env-section.collapsed .topic-item { display: none; }
+    .env-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--border-strong); flex-shrink: 0;
+      transition: background .3s;
+    }
+    .env-dot.conn-checking { background: var(--warning); animation: pulse 1.4s infinite; }
+    .env-dot.conn-ok       { background: var(--success); }
+    .env-dot.conn-fail     { background: var(--error); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .env-name { flex: 1; }
+    .env-bus-badge {
+      font-size: 9px; padding: 1px 5px; border-radius: 3px;
+      letter-spacing: .04em; font-weight: 700;
+    }
+    .env-bus-badge.stg  { background: rgba(210,153,34,.14); color: var(--warning); }
+    .env-bus-badge.prd  { background: rgba(63,185,80,.14);  color: var(--success); }
+
+    .topic-item {
+      display: flex; align-items: center;
+      padding: 7px 9px; border-radius: 6px;
+      cursor: pointer; gap: 9px;
+      transition: background .1s;
+      margin: 1px 0;
+      position: relative;
+    }
+    .topic-item:hover  { background: var(--hover); }
+    .topic-item.active {
+      background: var(--primary-bg);
+      box-shadow: inset 2px 0 0 var(--primary);
+    }
+    .topic-item.active .topic-name { color: var(--text); }
+    .topic-bus-icon { width: 14px; height: 14px; flex-shrink: 0; color: var(--text-dim); }
+    .topic-item.active .topic-bus-icon { color: var(--primary); }
+    .bus-pulsar .topic-bus-icon { color: var(--pulsar); }
+    .bus-kafka  .topic-bus-icon { color: var(--kafka); }
+    .topic-token-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--border-strong); flex-shrink: 0;
+      transition: background .2s;
+    }
+    .topic-token-dot.set   { background: var(--success); }
+    .topic-token-dot.unset { background: var(--error); opacity: .7; }
+    .topic-name {
+      flex: 1; font-size: 12px; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: var(--text-muted);
+    }
+    .topic-item:hover .topic-name { color: var(--text); }
+    .topic-item.running .topic-name { color: var(--success); }
+    .run-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--success); flex-shrink: 0; display: none;
+      animation: blink 1.4s infinite;
+    }
+    .topic-item.running .run-dot { display: block; }
+
+    /* ── Main ───────────────────────────────────────────── */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    /* Topic header (above content) */
+    #topbar {
+      background: var(--bg-elev); border-bottom: 1px solid var(--border);
+      padding: 10px 20px; display: flex; align-items: center;
+      gap: 10px; flex-shrink: 0; min-height: 48px;
+    }
+    #tb-broker {
+      font-size: 11.5px; color: var(--text-muted);
+      font-family: 'SF Mono','Fira Code',monospace;
+      flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* Controls bar */
+    #controls {
+      padding: 10px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      flex-shrink: 0; background: var(--bg-elev-2);
+    }
+    .ctrl-group {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 6px 0 0;
+    }
+    .ctrl-label {
+      font-size: 10.5px; color: var(--text-dim); white-space: nowrap;
+      text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+    }
+    .ctrl-input {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 6px;
+      font-size: 12px; font-family: 'SF Mono','Fira Code',monospace;
+      width: 220px;
+    }
+    .ctrl-input:focus { outline: none; border-color: var(--primary); }
+    .ctrl-input::placeholder { color: var(--text-dim); }
+    .ctrl-select {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 6px;
+      font-size: 12px; font-family: inherit; cursor: pointer;
+    }
+    .ctrl-select:focus { outline: none; border-color: var(--primary); }
+    .ctrl-spacer { flex: 1; }
+
+    /* Publish panel */
+    #publish-panel {
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+      background: var(--bg-elev-2); display: none; flex-direction: column; gap: 8px;
+      flex-shrink: 0;
+    }
+    #publish-panel.open { display: flex; }
+    #pub-textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 12px; border-radius: 6px;
+      font-size: 12px; font-family: 'SF Mono','Fira Code',monospace;
+      resize: vertical; min-height: 72px; line-height: 1.55;
+    }
+    #pub-textarea:focus { outline: none; border-color: var(--primary); }
+    #pub-textarea::placeholder { color: var(--text-dim); }
+    #pub-row { display: flex; align-items: center; gap: 8px; }
+    #pub-hint { font-size: 11px; color: var(--text-muted); flex: 1; }
+
+    /* Output area */
+    #output { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    #feed-tabs {
+      display: flex; align-items: stretch; gap: 0;
+      padding: 0 20px;
+      background: var(--bg-elev-2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .feed-tab {
+      padding: 11px 14px; font-size: 12.5px;
+      cursor: pointer; user-select: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted); font-weight: 500;
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: color .12s;
+    }
+    .feed-tab:hover { color: var(--text); }
+    .feed-tab.active {
+      color: var(--primary); font-weight: 600;
+      border-bottom-color: var(--primary);
+    }
+    .feed-tab svg { width: 14px; height: 14px; }
+    .feed-pill {
+      display: inline-block;
+      background: var(--primary); color: #000;
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-size: 10.5px; font-weight: 700;
+    }
+    .feed-spacer { flex: 1; }
+    #feed-tools { display: inline-flex; align-items: center; padding: 6px 0; }
+    #export-btn { padding: 4px 11px; font-size: 11px; }
+
+    #tab-content { flex: 1; overflow: hidden; display: flex; }
+    .tab-panel { display: none; flex: 1; overflow-y: auto; padding: 16px 20px; flex-direction: column; gap: 8px; }
+    .tab-panel.active { display: flex; }
+
+    /* ── Details tab ─────────────────────────────────── */
+    #tab-details { padding: 20px 24px; gap: 14px; max-width: 1100px; }
+    .details-card {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px;
+    }
+    .details-card h3 {
+      font-size: 10.5px; font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .details-card h3 svg { width: 13px; height: 13px; }
+    .details-header {
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .details-header-icon {
+      width: 44px; height: 44px;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+    .details-header-text { flex: 1; min-width: 0; }
+    .details-header-title {
+      font-size: 17px; font-weight: 700; color: var(--text);
+      letter-spacing: -.01em;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .details-header-tags {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .details-header-topic {
+      font-size: 12px; color: var(--text-muted);
+      font-family: 'SF Mono','Fira Code',monospace;
+      margin-top: 6px; word-break: break-all;
+    }
+    .details-table {
+      width: 100%; font-size: 12.5px;
+      border-collapse: collapse;
+    }
+    .details-table td {
+      padding: 8px 0; vertical-align: top;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .details-table tr:last-child td { border-bottom: none; }
+    .details-table td:first-child {
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-size: 10.5px;
+      font-weight: 700; letter-spacing: .06em;
+      width: 150px;
+      padding-right: 14px;
+    }
+    .details-table td:nth-child(2) {
+      font-family: 'SF Mono','Fira Code',monospace;
+      color: var(--text); word-break: break-all;
+    }
+    .details-table .pill-ok,
+    .details-table .pill-bad {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 9px; border-radius: 999px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: .03em;
+      font-family: inherit;
+    }
+    .details-table .pill-ok  { background: rgba(63,185,80,.14);  color: var(--success); }
+    .details-table .pill-bad { background: rgba(248,81,73,.14);  color: var(--error);   }
+    .details-table .pill-ok svg, .details-table .pill-bad svg { width: 11px; height: 11px; }
+    .details-actions {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .details-actions .btn { white-space: nowrap; }
+    .details-desc {
+      font-size: 13.5px; line-height: 1.65; color: var(--text);
+    }
+    .details-desc code {
+      font-family: 'SF Mono','Fira Code',monospace;
+      background: var(--bg-elev-2); padding: 1px 7px; border-radius: 3px;
+      color: var(--text); font-size: 12px;
+    }
+    .shape-preview {
+      background: #0a0c10; border: 1px solid var(--border);
+      border-radius: 7px; padding: 14px;
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 11.5px; line-height: 1.65;
+      max-height: 460px; overflow: auto;
+      color: var(--text); white-space: pre;
+    }
+    .shape-key   { color: var(--fd-blue-bright); }
+    .shape-type  { color: #56d364; }
+    .shape-null  { color: var(--text-muted); font-style: italic; }
+    .shape-empty {
+      color: var(--text-muted);
+      font-family: inherit; font-style: italic;
+      padding: 6px 0;
+    }
+    .shape-meta {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .shape-meta .badge { padding: 2px 9px; font-size: 10px; }
+    .bus-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 11px; border-radius: 999px;
+      font-size: 10.5px; font-weight: 700;
+      border: 1px solid;
+    }
+    .bus-tag svg { width: 11px; height: 11px; }
+    .bus-tag.pulsar { color: var(--pulsar); border-color: var(--pulsar); background: rgba(163,113,247,.10); }
+    .bus-tag.kafka  { color: var(--kafka);  border-color: var(--kafka);  background: rgba(240,136,62,.10); }
+
+    /* Console */
+    .console {
+      background: #0a0c10; border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; font-family: 'SF Mono','Fira Code','Menlo',monospace;
+      font-size: 12px; line-height: 1.65; flex: 1; overflow-y: auto;
+    }
+    .entry { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .entry:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .entry-meta { color: var(--text-muted); font-size: 10.5px; margin-bottom: 5px; }
+    .entry-cmd  { color: #7ee787; }
+    .entry-out  { color: #a8d8a8; white-space: pre-wrap; word-break: break-all; }
+    .entry-err  { color: var(--error); white-space: pre-wrap; }
+    .entry-ok   { color: var(--success); }
+    .entry-info { color: var(--primary); }
+
+    /* Live feed bubbles */
+    .msg-bubble {
+      background: rgba(20,147,255,.05); border: 1px solid rgba(20,147,255,.16);
+      border-radius: 7px; padding: 10px 13px;
+      white-space: pre-wrap; word-break: break-all;
+    }
+    .msg-bubble.decoded {
+      background: rgba(63,185,80,.04);
+      border-color: rgba(63,185,80,.18);
+    }
+    .msg-bubble.decoded pre {
+      margin: 0; padding: 0;
+      font-size: 11.5px; line-height: 1.55;
+      color: var(--text); white-space: pre;
+      overflow-x: auto; max-height: 320px;
+    }
+    .msg-ts { color: var(--text-muted); font-size: 10px; margin-top: 5px; }
+    .msg-bubble .proto-badge {
+      display: inline-block;
+      font-size: 9px; font-weight: 700;
+      background: rgba(63,185,80,.15);
+      color: var(--success);
+      border-radius: 3px;
+      padding: 1px 6px;
+      margin-left: 6px;
+      text-transform: uppercase; letter-spacing: .05em;
+      vertical-align: middle;
+    }
+    .msg-bubble .proto-badge.json {
+      background: rgba(20,147,255,.18); color: var(--fd-blue-bright);
+    }
+
+    /* Empty state */
+    .empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; flex: 1; gap: 14px;
+      color: var(--text-muted); text-align: center; padding: 40px 20px;
+    }
+    .empty-icon {
+      width: 72px; height: 72px;
+      color: var(--border-strong);
+      opacity: .6;
+    }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .empty-sub { font-size: 12.5px; max-width: 380px; line-height: 1.65; }
+
+    /* Animations */
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .live-dot {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--error); animation: blink 1.4s infinite;
+      margin-right: 4px; vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav id="navbar">
+  <a href="/" class="navbar-brand" title="FanDuel — GCD Streaming Diagnostics">
+    <div class="brand-icon" id="brand-icon">
+      <img src="/fanduel-shield.png" alt="FanDuel" width="22" height="22">
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">FanDuel <span class="brand-product">· GCD Streaming</span></span>
+      <span class="brand-sub">Pulsar · Kafka diagnostics</span>
+    </div>
+  </a>
+  <div class="navbar-links">
+    <a href="/" class="active" id="nav-listener"></a>
+    <a href="/compare.html" id="nav-compare"></a>
+  </div>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-right">
+    <div class="nav-meta" id="nav-context" style="display:none"></div>
+  </div>
+</nav>
+
+<!-- ═══ APP SHELL ═══ -->
+<div id="shell">
+
+<!-- ─── Sidebar ─────────────────────────────────────────── -->
+<aside id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-label" id="lbl-bus-section"></div>
+    <div class="bus-switch" id="bus-switch">
+      <button type="button" class="bus-btn active bus-pulsar" id="bus-btn-pulsar" onclick="setBusMode('pulsar')"></button>
+      <button type="button" class="bus-btn bus-kafka" id="bus-btn-kafka" onclick="setBusMode('kafka')"></button>
+    </div>
+  </div>
+  <div class="sidebar-section" style="padding-top:6px">
+    <div class="sidebar-section-label" id="lbl-topics-section"></div>
+    <div class="topic-toolbar">
+      <div class="toolbar-row">
+        <label class="env-chip on" data-type="stg" id="chip-stg" title="Toggle staging environments">
+          <input type="checkbox" id="filter-stg" checked onchange="onFilterChange()">
+          <span id="chip-stg-label"></span>
+        </label>
+        <label class="env-chip on" data-type="prd" id="chip-prd" title="Toggle production environments">
+          <input type="checkbox" id="filter-prd" checked onchange="onFilterChange()">
+          <span id="chip-prd-label"></span>
+        </label>
+        <div class="toolbar-spacer"></div>
+        <button class="icon-btn" id="btn-collapse-all" onclick="toggleCollapseAll()" title="Collapse / expand all environments"></button>
+      </div>
+      <div class="toolbar-row">
+        <select id="sort-topic" class="sort-select" onchange="onSortChange()" title="Sort topics within each environment by name">
+          <option value="default">Sort topics · default</option>
+          <option value="asc">Sort topics · A→Z</option>
+          <option value="desc">Sort topics · Z→A</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="env-list"></div>
+</aside>
+
+<!-- ─── Main ───────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- no-selection state -->
+  <div id="no-sel" class="empty">
+    <div class="empty-icon" id="empty-icon"></div>
+    <div class="empty-title">Select a topic to begin</div>
+    <div class="empty-sub">Pick the bus (Pulsar or Kafka), then choose an environment and topic from the sidebar. The connection status, configuration, and a description of every topic appear here when selected.</div>
+  </div>
+
+  <!-- active selection -->
+  <div id="sel-view" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+
+    <!-- top bar -->
+    <div id="topbar">
+      <span id="tb-badge" class="badge badge-none"></span>
+      <span id="tb-broker"></span>
+      <button class="btn btn-ghost" onclick="doCheckConnectivity()" title="Probe broker reachability with netcat" id="btn-conn"></button>
+    </div>
+
+    <!-- controls -->
+    <div id="controls">
+      <div class="ctrl-group">
+        <span class="ctrl-label" id="lbl-consumer-group">Sub name</span>
+        <input id="inp-sub" class="ctrl-input" placeholder="yourname-test-sub" oninput="saveSubName()" />
+      </div>
+      <select id="sel-sub-type" class="ctrl-select pulsar-only" title="Subscription type">
+        <option value="Shared" selected>Shared</option>
+        <option value="Exclusive">Exclusive</option>
+        <option value="Failover">Failover</option>
+        <option value="Key_Shared">Key_Shared</option>
+      </select>
+      <select id="sel-position" class="ctrl-select" title="Start position">
+        <option value="Latest" selected>Latest</option>
+        <option value="Earliest">Earliest</option>
+      </select>
+      <div class="ctrl-spacer"></div>
+      <select id="sel-count" class="ctrl-select" title="Stop after N messages">
+        <option value="0">∞ Unlimited</option>
+        <option value="1">1 msg</option>
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+      <button class="btn btn-success" id="listen-btn" onclick="toggleListen()"></button>
+      <button class="btn pulsar-only" id="publish-toggle-btn" onclick="togglePublishPanel()" title="Publish a message to this topic"></button>
+      <button class="btn btn-ghost" onclick="clearAll()" title="Clear output" id="btn-clear"></button>
+    </div>
+
+    <!-- publish panel -->
+    <div id="publish-panel">
+      <textarea id="pub-textarea" placeholder='{"fixtureId": 123, "status": "live"}'></textarea>
+      <div id="pub-row">
+        <span id="pub-hint">Publishes one message to <span id="pub-topic-hint" style="font-family:monospace;font-size:11px"></span></span>
+        <button class="btn btn-primary" onclick="doPublish()" id="btn-send"></button>
+        <button class="btn btn-ghost" onclick="togglePublishPanel()" id="btn-pub-close"></button>
+      </div>
+    </div>
+
+    <!-- output -->
+    <div id="output">
+      <div id="feed-tabs">
+        <div class="feed-tab active" data-tab="details" onclick="switchFeedTab('details')" id="ft-details"></div>
+        <div class="feed-tab" data-tab="live" onclick="switchFeedTab('live')" id="ft-live"></div>
+        <div class="feed-spacer"></div>
+        <div id="feed-tools">
+          <button id="export-btn" class="btn btn-ghost btn-sm" onclick="exportMessages()" title="Export live feed to JSON"></button>
+        </div>
+      </div>
+      <div id="tab-content">
+
+        <!-- Details panel — info, shape, quick actions -->
+        <div id="tab-details" class="tab-panel active">
+          <div class="details-card">
+            <div class="details-header">
+              <div class="details-header-icon" id="dt-icon"></div>
+              <div class="details-header-text">
+                <div class="details-header-title">
+                  <span id="dt-label"></span>
+                  <span class="details-header-tags" id="dt-tags"></span>
+                </div>
+                <div class="details-header-topic" id="dt-topic-path"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="details-card" id="dt-desc-card">
+            <h3 id="dt-h-about"></h3>
+            <div class="details-desc" id="dt-description"></div>
+          </div>
+
+          <div class="details-card">
+            <h3 id="dt-h-conn"></h3>
+            <table class="details-table">
+              <tbody>
+                <tr><td>Bus</td><td id="dt-bus"></td></tr>
+                <tr><td>Environment</td><td id="dt-env"></td></tr>
+                <tr><td>Broker</td><td id="dt-broker"></td></tr>
+                <tr><td>Topic path</td><td id="dt-topic"></td></tr>
+                <tr><td>Key field</td><td id="dt-keyfield"></td></tr>
+                <tr><td>Decoder</td><td id="dt-decoder"></td></tr>
+                <tr><td>Credentials</td><td id="dt-cred"></td></tr>
+                <tr id="dt-mirror-row"><td>Pulsar mirror</td><td id="dt-mirror"></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="details-card">
+            <h3 id="dt-h-actions"></h3>
+            <div class="details-actions">
+              <button class="btn btn-success" id="dt-listen-btn" onclick="listenFromDetails()"></button>
+              <button class="btn pulsar-only" id="dt-publish-btn" onclick="publishFromDetails()"></button>
+              <button class="btn btn-ghost" id="dt-conn-btn" onclick="doCheckConnectivity()"></button>
+              <button class="btn btn-ghost" id="dt-export-btn" onclick="exportMessages()"></button>
+              <a class="btn btn-ghost" id="dt-compare-btn" href="#"></a>
+            </div>
+          </div>
+
+          <div class="details-card">
+            <h3 id="dt-h-shape"></h3>
+            <div class="shape-meta" id="dt-shape-meta"></div>
+            <div class="shape-preview" id="dt-shape"></div>
+          </div>
+        </div>
+
+        <!-- Live feed panel -->
+        <div id="tab-live" class="tab-panel">
+          <div id="console-live" class="console">
+            <div class="entry-info">Enter a subscription name and press <strong>Listen</strong> to stream messages here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="/icons.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// Static icon paint — runs once after DOM is built
+// ═══════════════════════════════════════════════════════════
+function paintStaticIcons() {
+  const ic = (id, name, size, label) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = icon(name, size || 14) + (label ? ` <span>${label}</span>` : '');
+  };
+  // (brand-icon now hosts the FanDuel shield <img> directly — no JS paint needed.)
+  document.getElementById('nav-listener').innerHTML = icon('broadcast', 14) + '<span>Listener</span>';
+  document.getElementById('nav-compare').innerHTML  = icon('compare',   14) + '<span>Compare</span>';
+  document.getElementById('empty-icon').innerHTML = icon('inbox', 72, { stroke: 1.4 });
+  ic('lbl-bus-section',     'layers', 12);
+  document.getElementById('lbl-bus-section').innerHTML += ' Message bus';
+  ic('lbl-topics-section',  'topic',  12);
+  document.getElementById('lbl-topics-section').innerHTML += ' Topics';
+  document.getElementById('bus-btn-pulsar').innerHTML = icon('pulsar', 12) + ' Pulsar';
+  document.getElementById('bus-btn-kafka').innerHTML  = icon('kafka',  12) + ' Kafka';
+  document.getElementById('btn-collapse-all').innerHTML = icon('chevronUp', 11) + ' All';
+
+  // Buttons inside controls
+  document.getElementById('btn-conn').innerHTML       = icon('plug',     13) + ' Connectivity';
+  document.getElementById('btn-clear').innerHTML      = icon('trash',    13);
+  document.getElementById('btn-send').innerHTML       = icon('send',     13) + ' Send';
+  document.getElementById('btn-pub-close').innerHTML  = icon('x',        13);
+
+  // Feed tabs
+  document.getElementById('ft-details').innerHTML = icon('info',      14) + ' <span>Details</span>';
+  document.getElementById('ft-live').innerHTML    = icon('broadcast', 14) + ' <span>Live feed</span> <span class="feed-pill" id="live-pill" style="display:none">0</span>';
+  document.getElementById('export-btn').innerHTML = icon('download',  12) + ' Export';
+
+  // Details tab headings
+  document.getElementById('dt-h-about').innerHTML   = icon('info',    13) + ' About';
+  document.getElementById('dt-h-conn').innerHTML    = icon('server',  13) + ' Connection';
+  document.getElementById('dt-h-actions').innerHTML = icon('zap',     13) + ' Quick actions';
+  document.getElementById('dt-h-shape').innerHTML   = icon('layers',  13) + ' Response data structure';
+
+  updateListenButton(); updatePublishButton();
+}
+
+// ═══════════════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════════════
+let busMode         = 'pulsar'; // 'pulsar' | 'kafka'
+let envConfig       = [];     // /api/config
+let kafkaEnvConfig  = [];     // /api/kafka/config
+let current         = null;   // { env, topic }
+let envConnectivity = {};   // { envId: 'ok'|'fail'|'checking'|undefined }
+let currentFeedTab  = 'details';  // 'details' | 'live'
+
+// Sidebar prefs (topic sort + env STG/PRD filters + collapse state), persisted.
+const sortPrefs = (() => {
+  try { return JSON.parse(localStorage.getItem('gcdSidebarSort') || '{}'); }
+  catch { return {}; }
+})();
+sortPrefs.topic = sortPrefs.topic || 'default';   // 'default' | 'asc' | 'desc'
+
+// Env type filters — both default to on, user toggles to focus on STG or PRD only.
+const envFilters = (() => {
+  try { return JSON.parse(localStorage.getItem('gcdEnvFilters') || '{}'); }
+  catch { return {}; }
+})();
+envFilters.stg = envFilters.stg !== false;
+envFilters.prd = envFilters.prd !== false;
+
+const collapsedEnvs = (() => {
+  try { return JSON.parse(localStorage.getItem('gcdCollapsedEnvs') || '{}'); }
+  catch { return {}; }
+})();
+
+// Per-bus last selection — lets the user toggle Pulsar ⇄ Kafka without losing
+// their place. When you click the bus button, we auto-restore whichever topic
+// was last open on that bus (instead of dumping you back at the empty state).
+// Also survives a page refresh so reopening the tab keeps your context.
+const lastSelectionByBus = (() => {
+  try {
+    const o = JSON.parse(localStorage.getItem('gcdLastSelectionByBus') || '{}');
+    return { pulsar: o.pulsar || null, kafka: o.kafka || null };
+  } catch { return { pulsar: null, kafka: null }; }
+})();
+
+function persistSort()      { try { localStorage.setItem('gcdSidebarSort',     JSON.stringify(sortPrefs));     } catch {} }
+function persistFilters()   { try { localStorage.setItem('gcdEnvFilters',      JSON.stringify(envFilters));    } catch {} }
+function persistCollapsed() { try { localStorage.setItem('gcdCollapsedEnvs',  JSON.stringify(collapsedEnvs)); } catch {} }
+function persistLastSelection() { try { localStorage.setItem('gcdLastSelectionByBus', JSON.stringify(lastSelectionByBus)); } catch {} }
+function envCollapsedMap()  { return collapsedEnvs[busMode] || (collapsedEnvs[busMode] = {}); }
+function classifyEnv(env)   { return /prd|prod/.test(env.id) ? 'prd' : 'stg'; }
+
+// Resolve a saved selection (envId / topicId) against the current config —
+// returns the matching {env, topic} pair or null if it no longer exists
+// (config edits, removed topic, etc.).
+function findSelection(mode, sel) {
+  if (!sel) return null;
+  const list = mode === 'kafka' ? kafkaEnvConfig : envConfig;
+  const env = list.find((e) => e.id === sel.envId);
+  if (!env) return null;
+  const topic = env.topics?.find((t) => t.id === sel.topicId);
+  return topic ? { env, topic } : null;
+}
+
+// Per-topic — keyed by `${bus}::${envId}::${topicId}`.
+// Hydrated from sessionStorage so navigating to /compare.html and back
+// (or any in-tab page change) keeps the previously buffered messages.
+// WebSocket connections never survive a navigation, so `topicRunning` /
+// `topicWs` intentionally start empty — the user re-presses ▶ Listen to
+// resume the stream, but every message they had captured before is restored.
+const TOPIC_STATE_SS_KEY = 'gcdTopicState';
+const TOPIC_STATE_MAX_BYTES = 4_000_000;   // ~4 MB ceiling, well below the 5 MB sessionStorage quota
+const TOPIC_LIVE_HTML_CAP  = 400_000;      // per-topic char cap on the rendered HTML buffer
+const TOPIC_RAW_MSG_CAP    = 200;          // per-topic max retained raw messages
+const TOPIC_LOG_CAP        = 200;
+
+function loadTopicState() {
+  try {
+    const raw = sessionStorage.getItem(TOPIC_STATE_SS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  } catch { return {}; }
+}
+
+const topicState   = loadTopicState();
+const topicWs      = {};
+const topicRunning = {};
+
+// Snapshot `topicState` into sessionStorage. Trims oversized buffers, drops
+// transient fields, and evicts the least-recently-touched topics if the
+// serialized blob would blow past the quota. Designed to be safe to call
+// from `pagehide` / `visibilitychange` — never throws, never blocks unload.
+function persistTopicState() {
+  try {
+    const snap = {};
+    for (const k of Object.keys(topicState)) {
+      const s = topicState[k];
+      if (!s) continue;
+      const html = s.liveHTML || '';
+      snap[k] = {
+        // Trim from the head, keeping the most recent messages on screen.
+        liveHTML: html.length > TOPIC_LIVE_HTML_CAP
+          ? html.slice(html.length - TOPIC_LIVE_HTML_CAP)
+          : html,
+        liveInitCleared: !!s.liveInitCleared,
+        liveCount: s.liveCount || 0,
+        rawMessages: Array.isArray(s.rawMessages) ? s.rawMessages.slice(-TOPIC_RAW_MSG_CAP) : [],
+        sessionLog:  Array.isArray(s.sessionLog)  ? s.sessionLog.slice(-TOPIC_LOG_CAP)      : [],
+        lastTouched: s.lastTouched || Date.now()
+      };
+    }
+    let json = JSON.stringify(snap);
+    // LRU eviction if still too big.
+    while (json.length > TOPIC_STATE_MAX_BYTES) {
+      const keys = Object.keys(snap);
+      if (keys.length <= 1) break;
+      let oldest = keys[0];
+      for (const k of keys) {
+        if ((snap[k].lastTouched || 0) < (snap[oldest].lastTouched || 0)) oldest = k;
+      }
+      delete snap[oldest];
+      json = JSON.stringify(snap);
+    }
+    sessionStorage.setItem(TOPIC_STATE_SS_KEY, json);
+  } catch {
+    // sessionStorage unavailable or quota-exceeded — fail open so nav never breaks.
+  }
+}
+
+function touchTopicState(key) {
+  const s = topicState[key];
+  if (s) s.lastTouched = Date.now();
+}
+
+// Sub names — persisted to localStorage so they survive page reloads
+const subNames = (() => {
+  try { return JSON.parse(localStorage.getItem('gcdStreamingSubNames') || '{}'); } catch { return {}; }
+})();
+function persistSubNames() {
+  try { localStorage.setItem('gcdStreamingSubNames', JSON.stringify(subNames)); } catch {}
+}
+
+// Save sub name for current topic immediately (called on every keystroke)
+function saveSubName() {
+  const k = curKey();
+  if (!k) return;
+  subNames[k] = document.getElementById('inp-sub').value;
+  persistSubNames();
+}
+
+function curKey() { return current ? `${busMode}::${tKey(current.env.id, current.topic.id)}` : null; }
+function tKey(envId, topicId) { return `${envId}::${topicId}`; }
+
+function ensureState(key) {
+  if (!topicState[key]) topicState[key] = {
+    liveHTML: '', liveInitCleared: false,
+    liveCount: 0, rawMessages: [], sessionLog: [],
+    lastTouched: Date.now()
+  };
+  return topicState[key];
+}
+
+// ── Buffer save/restore ──────────────────────────────────
+function saveBuffers() {
+  const k = curKey();
+  if (!k) return;
+  const s = ensureState(k);
+  s.liveHTML        = document.getElementById('console-live').innerHTML;
+  s.liveInitCleared = true;   // DOM is now authoritative — don't auto-clear on bg messages
+  s.lastTouched     = Date.now();
+  subNames[k]       = document.getElementById('inp-sub').value;
+  persistSubNames();
+}
+
+function restoreBuffers() {
+  const k = curKey();
+  const s = k ? ensureState(k) : null;
+  const dfL = '<div class="entry-info">Enter a subscription name and press ▶ Listen to stream messages here.</div>';
+  document.getElementById('console-live').innerHTML = (s && s.liveHTML) ? s.liveHTML : dfL;
+  const cnt = (s && s.liveCount) || 0;
+  const pill = document.getElementById('live-pill');
+  pill.style.display = cnt > 0 ? 'inline' : 'none';
+  pill.textContent   = cnt;
+  document.getElementById('inp-sub').value = (k && subNames[k]) ? subNames[k] : '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// Boot
+// ═══════════════════════════════════════════════════════════
+// Paint icons synchronously — no awaiting fetches just to draw chrome.
+paintStaticIcons();
+
+// Restore persisted prefs into the UI immediately.
+const sortTopicEl = document.getElementById('sort-topic');
+if (sortTopicEl) sortTopicEl.value = sortPrefs.topic;
+paintFilterChips();
+
+(async function init() {
+  try {
+    envConfig = await fetch('/api/config').then(r => r.json());
+  } catch (e) {
+    console.error(e);
+    envConfig = [];
+  }
+  try {
+    kafkaEnvConfig = await fetch('/api/kafka/config').then(r => r.json());
+  } catch (e) {
+    console.error(e);
+    kafkaEnvConfig = [];
+  }
+  renderSidebar();
+  checkTools();
+
+  // Restore the last selection for the current bus, if any — so a page reload
+  // (Cmd-R) drops the user back at exactly the topic they were inspecting.
+  // Configs have to be loaded first, otherwise findSelection() can't resolve.
+  const restored = findSelection(busMode, lastSelectionByBus[busMode]);
+  if (restored) selectTopic(restored.env.id, restored.topic.id);
+})();
+
+// ── Persist topicState across navigation ────────────────────────────────
+// `pagehide` fires for both tab close *and* same-tab navigation (e.g. when
+// the user clicks "Compare" in the navbar), so this is the right moment to
+// flush the current DOM into topicState and serialize the whole snapshot.
+// `visibilitychange:hidden` is a belt-and-braces hook for mobile / iOS
+// where pagehide can be unreliable when the tab is swiped away.
+function flushTopicStateToSession() {
+  try { saveBuffers(); } catch {}
+  persistTopicState();
+}
+window.addEventListener('pagehide', flushTopicStateToSession);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushTopicStateToSession();
+});
+
+function checkTools() {
+  fetch('/api/check-tools').then(r => r.json()).then(r => {
+    if (r.client?.installed) return;  // all good — no need to clutter the feed
+    const lines = [];
+    lines.push((r.client?.installed ? '✓' : '✗') + ' pulsar-client  →  ' + (r.client?.path || 'not found'));
+    lines.push((r.nc?.installed     ? '✓' : '✗') + ' nc             →  ' + (r.nc?.path     || 'not found'));
+    if (r.javaHome) lines.push('  JAVA_HOME: ' + r.javaHome);
+    // Only show if tools are missing
+    log({
+      cmd: 'system check',
+      stderr: lines.join('\n')
+    });
+  }).catch(() => {});
+}
+
+// ═══════════════════════════════════════════════════════════
+// Sidebar
+// ═══════════════════════════════════════════════════════════
+function connClass(envId) {
+  const s = envConnectivity[envId];
+  if (s === 'checking') return 'conn-checking';
+  if (s === 'ok')       return 'conn-ok';
+  if (s === 'fail')     return 'conn-fail';
+  return '';  // untouched → grey
+}
+
+function setBusMode(mode) {
+  if (mode !== 'pulsar' && mode !== 'kafka') return;
+  // Save the DOM of whatever topic we're currently showing so its messages,
+  // input fields, etc. survive the bus switch (and any future return visit).
+  saveBuffers();
+  busMode = mode;
+  document.getElementById('bus-btn-pulsar').classList.toggle('active', mode === 'pulsar');
+  document.getElementById('bus-btn-kafka').classList.toggle('active', mode === 'kafka');
+  document.querySelectorAll('.pulsar-only').forEach((el) => {
+    el.style.display = mode === 'pulsar' ? '' : 'none';
+  });
+  const lbl = document.getElementById('lbl-consumer-group');
+  if (lbl) lbl.textContent = mode === 'kafka' ? 'Consumer group' : 'Sub name';
+  if (document.getElementById('inp-sub'))
+    document.getElementById('inp-sub').placeholder = mode === 'kafka' ? 'local-yourname-compare' : 'yourname-test-sub';
+  const panel = document.getElementById('publish-panel');
+  if (panel?.classList.contains('open')) togglePublishPanel();
+
+  // If the user had a topic open on this bus before, snap straight back to it
+  // (restoreBuffers inside selectTopic repaints every buffered message + the
+  // session subscription name). This makes Pulsar ⇄ Kafka feel like tab
+  // switching — your previous context is right where you left it.
+  const restored = findSelection(mode, lastSelectionByBus[mode]);
+  if (restored) {
+    selectTopic(restored.env.id, restored.topic.id);
+    return;
+  }
+
+  // No previous selection on this bus → show the empty state.
+  current = null;
+  document.getElementById('no-sel').style.display   = 'flex';
+  document.getElementById('sel-view').style.display  = 'none';
+  const navCtx = document.getElementById('nav-context');
+  if (navCtx) navCtx.style.display = 'none';
+  renderSidebar();
+}
+
+// Returns the envs to show — config order preserved, filtered by STG/PRD chips.
+function sortedEnvs() {
+  const raw = busMode === 'kafka' ? kafkaEnvConfig : envConfig;
+  return raw.filter((e) => envFilters[classifyEnv(e)]);
+}
+
+// Count envs of each type for chip labels — Kafka usually has many more.
+function envCounts() {
+  const raw = busMode === 'kafka' ? kafkaEnvConfig : envConfig;
+  let stg = 0, prd = 0;
+  for (const e of raw) (classifyEnv(e) === 'prd' ? prd++ : stg++);
+  return { stg, prd };
+}
+
+function sortedTopics(env) {
+  const list = (env.topics || []).slice();
+  if (sortPrefs.topic === 'asc')  list.sort((a, b) => a.label.localeCompare(b.label));
+  if (sortPrefs.topic === 'desc') list.sort((a, b) => b.label.localeCompare(a.label));
+  return list;
+}
+
+function renderSidebar() {
+  paintFilterChips();   // refresh counts whenever envs/bus change
+  const list = sortedEnvs();
+  const container = document.getElementById('env-list');
+  const busIcon = busMode === 'kafka' ? icon('kafka', 14) : icon('pulsar', 14);
+  const caretIcon = icon('chevron', 11);
+  const collapsedMap = envCollapsedMap();
+
+  if (!list.length) {
+    const reason = (!envFilters.stg && !envFilters.prd)
+      ? 'Both STG and PRD are hidden — toggle a chip above to show environments.'
+      : (!envFilters.stg ? 'PRD only — no production environments configured for this bus.'
+                          : 'STG only — no staging environments configured for this bus.');
+    container.innerHTML = `<div class="env-list-empty">${esc(reason)}</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map((env) => {
+    const envBadge = /prd|prod/.test(env.id) ? 'prd' : 'stg';
+    const envBadgeText = envBadge.toUpperCase();
+    const isCollapsed = !!collapsedMap[env.id];
+    const topics = sortedTopics(env);
+    return `
+    <div class="env-section bus-${busMode} ${isCollapsed ? 'collapsed' : ''}" data-env="${env.id}">
+      <div class="env-header" onclick="toggleEnvCollapse('${env.id}')" title="Click to ${isCollapsed ? 'expand' : 'collapse'}">
+        <span class="env-caret">${caretIcon}</span>
+        <div class="env-dot ${connClass(env.id)}" id="conn-dot-${env.id}"
+             title="Connectivity: ${envConnectivity[env.id] || 'not tested'}"></div>
+        <span class="env-name">${esc(env.name)}</span>
+        <span class="env-bus-badge ${envBadge}">${envBadgeText}</span>
+      </div>
+      ${topics.map(topic => {
+        const k         = tKey(env.id, topic.id);
+        const isActive  = current?.env.id === env.id && current?.topic.id === topic.id;
+        const isRunning = !!topicRunning[busMode + '::' + k];
+        const credOk    = busMode === 'kafka' ? topic.credentialReady : topic.tokenSet;
+        const credTitle = busMode === 'kafka'
+          ? (topic.credentialReady ? 'Credentials loaded' : ('Missing: ' + esc((env.requiresCredentials && env.credentialEnvHint) || 'OK')))
+          : (topic.tokenSet ? 'Token loaded' : 'Token not set: ' + esc(topic.tokenEnvVar));
+        const hoverTitle = topic.description
+          ? `${topic.label} — ${topic.topic}\n\n${topic.description}`
+          : `${topic.label} — ${topic.topic}`;
+        return `
+        <div class="topic-item ${isActive ? 'active' : ''} ${isRunning ? 'running' : ''}"
+             data-key="${env.id}-${topic.id}"
+             onclick="selectTopic('${env.id}','${topic.id}')"
+             title="${esc(hoverTitle)}">
+          <span class="topic-bus-icon">${busIcon}</span>
+          <div class="topic-token-dot ${credOk ? 'set' : 'unset'}"
+               title="${credTitle}"></div>
+          <span class="topic-name">${esc(topic.label)}</span>
+          <div class="run-dot" title="Listening…"></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ── Sort + filter + collapse interactions ─────────────────
+function onSortChange() {
+  sortPrefs.topic = document.getElementById('sort-topic').value;
+  persistSort();
+  renderSidebar();
+}
+
+function onFilterChange() {
+  envFilters.stg = document.getElementById('filter-stg').checked;
+  envFilters.prd = document.getElementById('filter-prd').checked;
+  persistFilters();
+  paintFilterChips();
+  renderSidebar();
+}
+
+// Update the visual on/off state of the STG / PRD chips and their counts.
+function paintFilterChips() {
+  const { stg, prd } = envCounts();
+  document.getElementById('chip-stg').classList.toggle('on', envFilters.stg);
+  document.getElementById('chip-prd').classList.toggle('on', envFilters.prd);
+  const stgLbl = document.getElementById('chip-stg-label');
+  const prdLbl = document.getElementById('chip-prd-label');
+  const fmt = (n) => (n > 0 ? ` <span style="opacity:.6;font-weight:600">${n}</span>` : '');
+  if (stgLbl) stgLbl.innerHTML = 'STG' + fmt(stg);
+  if (prdLbl) prdLbl.innerHTML = 'PRD' + fmt(prd);
+  document.getElementById('filter-stg').checked = envFilters.stg;
+  document.getElementById('filter-prd').checked = envFilters.prd;
+}
+
+function toggleEnvCollapse(envId) {
+  const map = envCollapsedMap();
+  map[envId] = !map[envId];
+  if (!map[envId]) delete map[envId];
+  persistCollapsed();
+  renderSidebar();
+}
+
+function toggleCollapseAll() {
+  const list = sortedEnvs();
+  const map  = envCollapsedMap();
+  const anyOpen = list.some((e) => !map[e.id]);
+  if (anyOpen) list.forEach((e) => { map[e.id] = true; });
+  else         list.forEach((e) => { delete map[e.id]; });
+  persistCollapsed();
+  renderSidebar();
+}
+
+// Update a single sidebar item's running class without re-rendering everything
+function setSidebarRunning(key, running) {
+  const parts = key.split('::');
+  if (parts.length < 3) return;
+  const envId = parts[1];
+  const topicId = parts[2];
+  const el = document.querySelector(`.topic-item[data-key="${envId}-${topicId}"]`);
+  if (el) el.classList.toggle('running', running);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Topic selection
+// ═══════════════════════════════════════════════════════════
+function selectTopic(envId, topicId) {
+  const list  = busMode === 'kafka' ? kafkaEnvConfig : envConfig;
+  const env   = list.find(e => e.id === envId);
+  const topic = env?.topics.find(t => t.id === topicId);
+  if (!env || !topic) return;
+
+  saveBuffers();
+  current = { env, topic };
+  // Remember this as the "where I was" anchor for the current bus so that
+  // toggling Pulsar ⇄ Kafka and back snaps right back to this topic.
+  lastSelectionByBus[busMode] = { envId, topicId };
+  persistLastSelection();
+  renderSidebar();
+
+  document.getElementById('no-sel').style.display    = 'none';
+  document.getElementById('sel-view').style.display  = 'flex';
+
+  const isPrd = /prd|prod/.test(envId);
+  const badge = document.getElementById('tb-badge');
+  badge.className = isPrd ? 'badge badge-prd' : 'badge badge-stg';
+  badge.innerHTML = (window.icon ? icon(isPrd ? 'check' : 'warning', 11) : '●') + ' ' + (isPrd ? 'PRD' : 'STG');
+
+  // Navbar context (right side)
+  const navCtx = document.getElementById('nav-context');
+  if (navCtx) {
+    navCtx.style.display = 'inline-flex';
+    navCtx.innerHTML = icon(busMode === 'kafka' ? 'kafka' : 'pulsar', 11) +
+      ` <span>${esc(env.name)}</span>`;
+  }
+
+  document.getElementById('tb-broker').textContent      = busMode === 'kafka' ? env.bootstrap : env.brokerUrl;
+  document.getElementById('pub-topic-hint').textContent = topic.topic;
+
+  renderDetails();
+  restoreBuffers();
+  updateListenButton();
+}
+
+// ═══════════════════════════════════════════════════════════
+// Connectivity
+// ═══════════════════════════════════════════════════════════
+async function doCheckConnectivity() {
+  if (!current) return;
+  const envId = current.env.id;
+
+  envConnectivity[envId] = 'checking';
+  const dot = document.getElementById(`conn-dot-${envId}`);
+  if (dot) { dot.className = 'env-dot conn-checking'; dot.title = 'Checking…'; }
+
+  const cmdLabel = busMode === 'kafka'
+    ? `nc (first broker in ${current.env.bootstrap.slice(0, 40)}…)`
+    : `nc -zv ${current.env.brokerUrl}`;
+  const id = log({ cmd: cmdLabel, loading: true });
+
+  const res = busMode === 'kafka'
+    ? await fetch('/api/kafka/check-connectivity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bootstrap: current.env.bootstrap })
+      }).then(r => r.json())
+    : await fetch('/api/check-connectivity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brokerUrl: current.env.brokerUrl })
+      }).then(r => r.json());
+
+  envConnectivity[envId] = res.success ? 'ok' : 'fail';
+  if (dot) {
+    dot.className = `env-dot ${connClass(envId)}`;
+    dot.title     = `Connectivity: ${res.success ? 'ok' : 'failed'}`;
+  }
+
+  updateLog(id, {
+    cmd: res.cmd || cmdLabel,
+    stdout: res.success ? res.output : '',
+    stderr: !res.success ? res.output : ''
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Listen — per-topic WebSocket lifecycle
+// ═══════════════════════════════════════════════════════════
+function updateListenButton() {
+  const k       = curKey();
+  const running = k ? !!topicRunning[k] : false;
+  const btn     = document.getElementById('listen-btn');
+  if (btn) {
+    btn.innerHTML = running
+      ? '<span class="live-dot"></span> Stop'
+      : (window.icon ? icon('play', 13) + ' Listen' : '▶ Listen');
+    btn.className = running ? 'btn btn-danger' : 'btn btn-success';
+  }
+  const dtBtn = document.getElementById('dt-listen-btn');
+  if (dtBtn) {
+    dtBtn.innerHTML = running
+      ? '<span class="live-dot"></span> Stop listening'
+      : (window.icon ? icon('play', 13) + ' Listen' : '▶ Listen');
+    dtBtn.className = running ? 'btn btn-danger' : 'btn btn-success';
+  }
+}
+
+function updatePublishButton() {
+  const btn = document.getElementById('publish-toggle-btn');
+  if (!btn || !window.icon) return;
+  const open = document.getElementById('publish-panel')?.classList.contains('open');
+  btn.innerHTML = icon('send', 13) + ' Publish';
+  btn.className = open ? 'btn btn-primary pulsar-only' : 'btn pulsar-only';
+}
+
+function toggleListen() {
+  const k = curKey();
+  if (!k) return;
+  topicRunning[k] ? stopListen(k) : startListen(k);
+}
+
+function startListen(k) {
+  k = k || curKey();
+  if (!k) return;
+  if (topicRunning[k]) return;
+
+  if (!current || curKey() !== k) return;
+
+  if (busMode === 'kafka' && !current.topic.credentialReady) {
+    alert('Set Confluent API credentials (see README / tokens.sh.example), restart the server, then try again.');
+    document.getElementById('inp-sub').focus();
+    return;
+  }
+
+  const sub = document.getElementById('inp-sub').value.trim();
+  if (!sub) {
+    alert(busMode === 'kafka' ? 'Enter a consumer group id first.' : 'Enter a subscription name first.');
+    document.getElementById('inp-sub').focus();
+    return;
+  }
+
+  subNames[k] = sub;
+  persistSubNames();
+
+  // Tear down any stale WS for this key
+  closeTopicWs(k);
+
+  const ws = new WebSocket(`ws://${location.host}`);
+  topicWs[k]      = ws;
+  topicRunning[k] = true;
+
+  updateListenButton();
+  setSidebarRunning(k, true);
+  switchTab('live');
+
+  const envId   = current.env.id;
+  const topicId = current.topic.id;
+
+  ws.onopen = () => {
+    if (!topicRunning[k] || ws.readyState !== WebSocket.OPEN) return;
+    const base = {
+      action:               'start-consume',
+      envId,
+      topicId,
+      subscriptionName:     sub,
+      subscriptionPosition: document.getElementById('sel-position').value,
+      count:                parseInt(document.getElementById('sel-count').value)
+    };
+    if (busMode === 'kafka') base.transport = 'kafka';
+    else base.subscriptionType = document.getElementById('sel-sub-type').value;
+    ws.send(JSON.stringify(base));
+  };
+
+  ws.onmessage = (e) => {
+    let d; try { d = JSON.parse(e.data); } catch { return; }
+    handleWsMessage(k, d);
+  };
+
+  ws.onerror = () => handleWsMessage(k, { type: 'error', message: 'WebSocket connection error' });
+
+  ws.onclose = () => {
+    if (!topicRunning[k]) return;  // already cleanly stopped
+    topicRunning[k] = false;
+    delete topicWs[k];
+    setSidebarRunning(k, false);
+    const msg = '<div style="color:var(--muted)">⚡ Connection closed unexpectedly.</div>';
+    if (k === curKey()) { appendLiveDOM(msg); updateListenButton(); }
+    else bgAppend(k, msg);
+  };
+}
+
+function stopListen(k) {
+  k = k || curKey();
+  if (!k) return;
+  const ws = topicWs[k];
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ action: 'stop-consume' }));
+    // consume-stopped message will clean up state
+  } else {
+    // WS already gone — clean up locally
+    topicRunning[k] = false;
+    delete topicWs[k];
+    setSidebarRunning(k, false);
+    if (k === curKey()) updateListenButton();
+  }
+}
+
+function closeTopicWs(k) {
+  const ws = topicWs[k];
+  if (!ws) return;
+  ws.onclose = null;   // suppress the onclose handler
+  try { ws.close(); } catch {}
+  delete topicWs[k];
+}
+
+// ── WebSocket message router ─────────────────────────────
+function handleWsMessage(key, d) {
+  const isCurrent = key === curKey();
+  const state     = ensureState(key);
+  // Any inbound traffic — error, started, stopped, data — counts as activity
+  // for LRU purposes, even for the current topic where bgAppend doesn't run.
+  state.lastTouched = Date.now();
+
+  if (d.type === 'error') {
+    const html = `<div class="entry-err">Error: ${esc(d.message)}</div>`;
+    if (isCurrent) appendLiveDOM(html); else bgAppend(key, html);
+    state.sessionLog.push({ timestamp: new Date().toISOString(), event: 'error', message: d.message });
+    topicRunning[key] = false;
+    closeTopicWs(key);
+    setSidebarRunning(key, false);
+    if (isCurrent) updateListenButton();
+    return;
+  }
+
+  if (d.type === 'consume-started') {
+    const html = `<div class="entry-info">▶ Listening: ${esc(d.topicPath)}</div>`;
+    if (isCurrent) appendLiveDOM(html); else bgAppend(key, html);
+    state.sessionLog.push({ timestamp: new Date().toISOString(), event: 'consume_started', topic: d.topicPath });
+    return;
+  }
+
+  if (d.type === 'consume-stopped') {
+    const html = `<div style="color:var(--muted)">⏹ Stopped.</div>`;
+    if (isCurrent) appendLiveDOM(html); else bgAppend(key, html);
+    state.sessionLog.push({ timestamp: new Date().toISOString(), event: 'consume_stopped' });
+    topicRunning[key] = false;
+    closeTopicWs(key);
+    setSidebarRunning(key, false);
+    if (isCurrent) updateListenButton();
+    return;
+  }
+
+  if (d.type === 'messages') {
+    // Stderr path (connection errors, etc.)
+    if (d.stderr) {
+      state.liveCount++;
+      const html = `<div class="msg-bubble"><span class="entry-err">${esc(d.stderr)}</span><div class="msg-ts">${d.timestamp}</div></div>`;
+      state.rawMessages.push({ type: 'err', text: d.stderr, timestamp: d.timestamp, decoded: null });
+      if (isCurrent) {
+        appendLiveDOM(html);
+        const pill = document.getElementById('live-pill');
+        pill.style.display = 'inline';
+        pill.textContent = state.liveCount;
+      } else {
+        bgAppend(key, html);
+      }
+      return;
+    }
+
+    // Use parsedMessages array if server sent it, otherwise wrap stdout as a single entry
+    const msgs = (d.parsedMessages && d.parsedMessages.length)
+      ? d.parsedMessages
+      : [{ text: d.stdout || '(empty response)', decoded: null }];
+
+    for (const m of msgs) {
+      state.liveCount++;
+
+      let html;
+      const metaLine = m.metaLine ? `<div class="entry-meta" style="margin-bottom:5px">${esc(m.metaLine)}</div>` : '';
+      if (m.decoded) {
+        const json = JSON.stringify(m.decoded, null, 2);
+        const isJson = m.decodeKind === 'json';
+        const badge = isJson ? 'json' : 'proto';
+        html = metaLine + `<div class="msg-bubble decoded"><pre>${esc(json)}</pre><div class="msg-ts">${d.timestamp}<span class="proto-badge${isJson ? ' json' : ''}">${badge}</span></div></div>`;
+      } else {
+        const content = m.text || m.raw || '(empty)';
+        html = metaLine + `<div class="msg-bubble"><span class="entry-out">${esc(content)}</span><div class="msg-ts">${d.timestamp}</div></div>`;
+      }
+
+      state.rawMessages.push({
+        type: 'out', text: m.text || m.raw || '',
+        timestamp: d.timestamp, decoded: m.decoded || null, metaLine: m.metaLine || null,
+        decodeKind: m.decodeKind || (m.decoded ? 'proto' : undefined)
+      });
+
+      if (isCurrent) {
+        appendLiveDOM(html);
+        const pill = document.getElementById('live-pill');
+        if (pill) { pill.style.display = 'inline'; pill.textContent = state.liveCount; }
+      } else {
+        bgAppend(key, html);
+      }
+    }
+    // If the user is looking at Details, refresh the shape preview lazily
+    // so the type tree reflects the newest decoded message.
+    if (isCurrent && currentFeedTab === 'details') renderShape();
+  }
+}
+
+// Append HTML to a background topic's saved liveHTML
+function bgAppend(key, innerHtml) {
+  const state = ensureState(key);
+  if (!state.liveInitCleared) {
+    state.liveHTML        = '';   // discard default placeholder text
+    state.liveInitCleared = true;
+  }
+  state.liveHTML += `<div class="entry">${innerHtml}</div>`;
+  state.lastTouched = Date.now();
+}
+
+// ═══════════════════════════════════════════════════════════
+// Publish
+// ═══════════════════════════════════════════════════════════
+function togglePublishPanel() {
+  const panel = document.getElementById('publish-panel');
+  const open  = panel.classList.toggle('open');
+  updatePublishButton();
+  if (open) document.getElementById('pub-textarea').focus();
+}
+
+async function doPublish() {
+  if (busMode === 'kafka') {
+    alert('Message publishing is only available for Pulsar topics in this client.');
+    return;
+  }
+  if (!current) return;
+  const message = document.getElementById('pub-textarea').value.trim();
+  if (!message) { alert('Enter a message to publish.'); return; }
+
+  const cmdLabel = `pulsar-client produce ${current.topic.topic}`;
+  const id = log({ cmd: cmdLabel, loading: true });
+
+  const res = await fetch('/api/produce', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ envId: current.env.id, topicId: current.topic.id, message })
+  }).then(r => r.json());
+
+  updateLog(id, { cmd: cmdLabel, ...res });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Output helpers
+// ═══════════════════════════════════════════════════════════
+function log(data) {
+  const el = document.getElementById('console-live');
+  if (!el) return null;
+  if (el.firstChild?.classList?.contains('entry-info')) el.innerHTML = '';
+  const entry = document.createElement('div');
+  entry.className = 'entry';
+  const id = `e-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  entry.id = id;
+  entry.innerHTML = buildEntry(data);
+  el.appendChild(entry);
+  el.scrollTop = el.scrollHeight;
+  return id;
+}
+
+function updateLog(id, data) {
+  const entry = document.getElementById(id);
+  if (!entry) { log(data); return; }
+  entry.innerHTML = buildEntry(data);
+  document.getElementById('console-live').scrollTop = 999999;
+}
+
+function buildEntry(data) {
+  const time = new Date().toLocaleTimeString();
+  const meta = `<div class="entry-meta"><span class="entry-cmd">$</span> ${esc(data.cmd || '')} · ${time}</div>`;
+  if (data.loading) return meta + `<div style="color:var(--muted)">running…</div>`;
+  const out = data.stdout || '';
+  const err = data.stderr || data.error || '';
+  return meta
+    + (out ? `<div class="entry-out">${esc(out)}</div>` : '')
+    + (err ? `<div class="entry-err">${esc(err)}</div>` : '')
+    + (!out && !err ? `<div style="color:var(--muted)">(no output)</div>` : '');
+}
+
+function appendLiveDOM(innerHtml) {
+  const el = document.getElementById('console-live');
+  if (!el) return;
+  if (el.firstChild?.classList?.contains('entry-info')) el.innerHTML = '';
+  const d = document.createElement('div');
+  d.className = 'entry';
+  d.innerHTML = innerHtml;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearAll() {
+  document.getElementById('console-live').innerHTML = '';
+  const pill = document.getElementById('live-pill');
+  pill.style.display = 'none';
+  pill.textContent   = '0';
+  const k = curKey();
+  if (k && topicState[k]) {
+    Object.assign(topicState[k], {
+      liveHTML: '', liveInitCleared: false,
+      liveCount: 0, rawMessages: [], sessionLog: []
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Export — JSON format
+// ═══════════════════════════════════════════════════════════
+function exportMessages() {
+  const k = curKey();
+  const s = k ? topicState[k] : null;
+  if (!s || !s.rawMessages.length) { alert('No messages to export yet.'); return; }
+
+  const topic = current?.topic?.topic || 'topic';
+  const env   = current?.env?.id || 'env';
+
+  // Extract just the payload from pulsar-client stdout: lines like "content:<json or text>"
+  function extractPayload(text) {
+    const m = text.match(/^content:([\s\S]*)$/m);
+    if (m) {
+      const raw = m[1].trim();
+      try { return JSON.parse(raw); } catch { return raw; }
+    }
+    return text;
+  }
+
+  const out = {
+    meta: {
+      bus: busMode,
+      env,
+      topic,
+      messageCount: s.rawMessages.length,
+      exportedAt:   new Date().toISOString()
+    },
+    messages: s.rawMessages.map((m, i) => ({
+      index:     i + 1,
+      timestamp: m.timestamp,
+      metaLine:  m.metaLine || undefined,
+      decodeKind: m.decodeKind || undefined,
+      content:   m.decoded || extractPayload(m.text)
+    })),
+    session_log: s.sessionLog || []
+  };
+
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const ts   = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  a.href     = url;
+  a.download = `${busMode}-${env}-${topic.split(/[./]/).filter(Boolean).pop()}-${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function switchTab(_name) {
+  // Single panel — nothing to switch; kept for call-site compatibility
+}
+
+// ═══════════════════════════════════════════════════════════
+// Feed tabs (Details / Live feed)
+// ═══════════════════════════════════════════════════════════
+function switchFeedTab(name) {
+  currentFeedTab = name;
+  for (const t of document.querySelectorAll('.feed-tab')) {
+    t.classList.toggle('active', t.dataset.tab === name);
+  }
+  document.getElementById('tab-details').classList.toggle('active', name === 'details');
+  document.getElementById('tab-live').classList.toggle('active',    name === 'live');
+  if (name === 'details') renderShape();
+}
+
+// ═══════════════════════════════════════════════════════════
+// Details tab — header, connection, actions, response shape
+// ═══════════════════════════════════════════════════════════
+function renderDetails() {
+  if (!current) return;
+  const { env, topic } = current;
+  const bus = busMode;
+  const isKafka = bus === 'kafka';
+  const isPrd   = /prd|prod/.test(env.id);
+
+  // Header
+  document.getElementById('dt-icon').innerHTML  = icon(isKafka ? 'kafka' : 'pulsar', 20);
+  document.getElementById('dt-label').textContent = topic.label;
+  document.getElementById('dt-tags').innerHTML =
+    `<span class="bus-tag ${bus}">${icon(isKafka ? 'kafka' : 'pulsar', 11)} ${isKafka ? 'Kafka' : 'Pulsar'}</span>` +
+    `<span class="badge badge-${isPrd ? 'prd' : 'stg'}">${icon(isPrd ? 'check' : 'warning', 11)} ${isPrd ? 'PRD' : 'STG'}</span>`;
+  document.getElementById('dt-topic-path').textContent = topic.topic;
+
+  // About
+  const descCard = document.getElementById('dt-desc-card');
+  const descEl   = document.getElementById('dt-description');
+  if (topic.description) {
+    descEl.innerHTML = renderDescription(topic.description);
+    descCard.style.display = '';
+  } else {
+    descEl.innerHTML = '';
+    descCard.style.display = 'none';
+  }
+
+  // Connection table
+  document.getElementById('dt-bus').textContent     = isKafka ? 'Kafka' : 'Pulsar';
+  document.getElementById('dt-env').textContent     = env.name + '  (' + env.id + ')';
+  document.getElementById('dt-broker').textContent  = isKafka ? env.bootstrap : env.brokerUrl;
+  document.getElementById('dt-topic').textContent   = topic.topic;
+  document.getElementById('dt-keyfield').textContent = isKafka
+    ? (topic.keyField || '(Kafka record key — bytes)')
+    : (topic.keyName  || '—');
+
+  // Decoder line
+  let decoder = '—';
+  if (topic.schemaFile) decoder = `Protobuf · ${topic.schemaFile}` + (topic.protoMessage ? ` · ${topic.protoMessage}` : '');
+  else if (topic.valueFormat === 'json') decoder = 'JSON (Stats deserializer — strips byte prefix, parses payload)';
+  else if (isKafka) decoder = 'Raw bytes (no schema bound — rendered as UTF-8/hex)';
+  else decoder = 'Raw bytes';
+  document.getElementById('dt-decoder').textContent = decoder;
+
+  // Credentials pill
+  const credTd = document.getElementById('dt-cred');
+  let credOk, credMsg;
+  if (isKafka) {
+    credOk = !!topic.credentialReady;
+    credMsg = credOk
+      ? (env.requiresCredentials ? `Loaded (${env.credentialEnvHint || 'API key/secret'})` : 'Not required')
+      : `Missing: ${env.credentialEnvHint || 'API key/secret'} — set env vars and restart`;
+  } else {
+    credOk = !!topic.tokenSet;
+    credMsg = credOk ? `Token loaded · ${topic.tokenEnvVar || 'env var'}` : `Token not set · ${topic.tokenEnvVar || 'env var'}`;
+  }
+  credTd.innerHTML = `<span class="${credOk ? 'pill-ok' : 'pill-bad'}">${icon(credOk ? 'check' : 'warning', 11)} ${esc(credMsg)}</span>`;
+
+  // Pulsar mirror row (Kafka-only)
+  const mirrorRow = document.getElementById('dt-mirror-row');
+  if (isKafka && topic.pulsarMirror) {
+    mirrorRow.style.display = '';
+    document.getElementById('dt-mirror').textContent = topic.pulsarMirror;
+  } else {
+    mirrorRow.style.display = 'none';
+  }
+
+  // Quick action buttons
+  const listenBtn = document.getElementById('dt-listen-btn');
+  const k = curKey();
+  const running = !!topicRunning[k];
+  listenBtn.innerHTML = running
+    ? `<span class="live-dot"></span> Stop listening`
+    : icon('play', 13) + ' Listen';
+  listenBtn.className = running ? 'btn btn-danger' : 'btn btn-success';
+
+  const pubBtn = document.getElementById('dt-publish-btn');
+  if (isKafka) {
+    pubBtn.style.display = 'none';
+  } else {
+    pubBtn.style.display = '';
+    pubBtn.innerHTML = icon('send', 13) + ' Publish a message';
+  }
+  document.getElementById('dt-conn-btn').innerHTML   = icon('plug',     13) + ' Test connectivity';
+  document.getElementById('dt-export-btn').innerHTML = icon('download', 13) + ' Export captured';
+
+  // Compare deep-link → /compare.html?bus<A|B>=…&env<A|B>=…&topic<A|B>=…
+  // Side A defaults to this topic; the user picks Side B on the compare page.
+  const params = new URLSearchParams();
+  params.set('busA',   bus);
+  params.set('envA',   env.id);
+  params.set('topicA', topic.id);
+  const cmp = document.getElementById('dt-compare-btn');
+  cmp.href = '/compare.html?' + params.toString();
+  cmp.innerHTML = icon('compare', 13) + ' Compare with another topic';
+
+  renderShape();
+}
+
+// Build a type-only tree from a sample object — used for the shape preview.
+function shapeOf(value, depth = 0, maxDepth = 6) {
+  if (value === null) return null;
+  if (Array.isArray(value)) {
+    if (!value.length) return [];
+    if (depth >= maxDepth) return ['…'];
+    return [shapeOf(value[0], depth + 1, maxDepth)];
+  }
+  if (typeof value === 'object') {
+    if (depth >= maxDepth) return { '__truncated__': '…' };
+    const out = {};
+    for (const k of Object.keys(value)) out[k] = shapeOf(value[k], depth + 1, maxDepth);
+    return out;
+  }
+  return typeof value;
+}
+
+// Render the shape tree as syntax-highlighted JSON.
+function shapeToHtml(value, indent = 0) {
+  const pad = '  '.repeat(indent);
+  if (value === null)         return '<span class="shape-null">null</span>';
+  if (typeof value === 'string') return `<span class="shape-type">"${esc(value)}"</span>`;
+  if (Array.isArray(value)) {
+    if (!value.length) return '[]';
+    const inner = shapeToHtml(value[0], indent + 1);
+    return `[\n${'  '.repeat(indent + 1)}${inner}\n${pad}]`;
+  }
+  if (typeof value === 'object') {
+    const keys = Object.keys(value);
+    if (!keys.length) return '{}';
+    const lines = keys.map((k, i) => {
+      const v = shapeToHtml(value[k], indent + 1);
+      const trailing = (i < keys.length - 1) ? ',' : '';
+      return `${'  '.repeat(indent + 1)}<span class="shape-key">"${esc(k)}"</span>: ${v}${trailing}`;
+    });
+    return `{\n${lines.join('\n')}\n${pad}}`;
+  }
+  return esc(String(value));
+}
+
+function renderShape() {
+  if (!current) return;
+  const k = curKey();
+  const s = k ? topicState[k] : null;
+  const decoded = s?.rawMessages?.slice().reverse().find((m) => m.decoded)?.decoded;
+  const meta = document.getElementById('dt-shape-meta');
+  const shape = document.getElementById('dt-shape');
+  if (!decoded) {
+    meta.innerHTML = `${icon('info', 11)} No message captured yet — press <strong>Listen</strong> to populate the shape preview from a real message.`;
+    shape.innerHTML = `<div class="shape-empty">// Waiting for the first decoded message…</div>`;
+    return;
+  }
+  const total = (s.rawMessages || []).length;
+  const decodedCount = (s.rawMessages || []).filter((m) => m.decoded).length;
+  const last = s.rawMessages[s.rawMessages.length - 1];
+  meta.innerHTML = `
+    <span class="badge badge-prd">${icon('check', 10)} sample ready</span>
+    <span>${decodedCount} decoded / ${total} total · last @ ${esc(last.timestamp || '—')}</span>
+  `;
+  const tree = shapeOf(decoded);
+  shape.innerHTML = shapeToHtml(tree);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Quick action handlers (in Details tab)
+// ═══════════════════════════════════════════════════════════
+function listenFromDetails() {
+  if (!current) return;
+  switchFeedTab('live');
+  toggleListen();
+  renderDetails();
+}
+
+function publishFromDetails() {
+  if (busMode !== 'pulsar' || !current) return;
+  const panel = document.getElementById('publish-panel');
+  if (!panel.classList.contains('open')) togglePublishPanel();
+  document.getElementById('pub-textarea').focus();
+}
+
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Render a topic description. Supports `code` markers (single backticks) for
+// inline code formatting; everything else is escaped.
+function renderDescription(text) {
+  if (!text) return '';
+  return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+</script>
+</body>
+</html>

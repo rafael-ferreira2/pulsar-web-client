@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package com.ppb.gamestate.api.outbound.participant;
+
+import "game_state_api_outbound_common.proto";
+import "game_state_api_outbound_sport_soccer.proto";
+import "game_state_api_outbound_sport_tennis.proto";
+
+message Participant {
+    reserved 3;
+    string id = 1;
+    ParticipantType type = 2;
+    string name = 4;
+    repeated com.ppb.gamestate.api.outbound.common.ExternalRef external_ref = 5;
+    ParticipantInfo info = 6;
+
+    enum ParticipantType {
+        PLAYER = 0;
+        TEAM = 1;
+        NOT_DEFINED = 2;
+    }
+
+    message ParticipantInfo {
+        oneof team_player_attributes {
+            TeamAttributes team_attributes = 1;
+            PlayerAttributes player_attributes = 2;
+        }
+
+        message TeamAttributes {
+            oneof participant_attributes {
+                com.ppb.gamestate.api.outbound.sport.soccer.SoccerTeamAttributes soccer_team_attributes = 1;
+                com.ppb.gamestate.api.outbound.sport.tennis.TennisTeamAttributes tennis_team_attributes = 2;
+            }
+        }
+
+        message PlayerAttributes {
+            oneof participant_attributes {
+                com.ppb.gamestate.api.outbound.sport.soccer.SoccerPlayerAttributes soccer_player_attributes = 1;
+            }
+        }
+    }
+}

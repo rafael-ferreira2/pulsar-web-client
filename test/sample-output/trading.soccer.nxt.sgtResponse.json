@@ -1,0 +1,72 @@
+{
+  "source": {
+    "bus": "kafka",
+    "env": "kafka-stg",
+    "topic": "trading.soccer.nxt.sgt",
+    "description": "GCD source Kafka topic on UKI MSK."
+  },
+  "messagesReceived": 3,
+  "exportedAt": "2026-05-14T13:00:02.000Z",
+  "latest": {
+    "meta": {
+      "gameStateId": "g-42",
+      "fixtureId": 99
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "LIVE",
+    "kafkaOffset": 17
+  },
+  "stream": [
+    {
+      "ts": "2026-05-14T12:59:56.000Z",
+      "decoded": {
+        "meta": {
+          "gameStateId": "g-42",
+          "fixtureId": 99
+        },
+        "score": {
+          "home": 0,
+          "away": 0
+        },
+        "status": "LIVE",
+        "kafkaOffset": 17
+      },
+      "text": ""
+    },
+    {
+      "ts": "2026-05-14T13:00:01.500Z",
+      "decoded": {
+        "meta": {
+          "gameStateId": "g-42",
+          "fixtureId": 99
+        },
+        "score": {
+          "home": 0,
+          "away": 0
+        },
+        "status": "LIVE",
+        "kafkaOffset": 17
+      },
+      "text": ""
+    },
+    {
+      "ts": "2026-05-14T13:00:06.500Z",
+      "decoded": {
+        "meta": {
+          "gameStateId": "g-42",
+          "fixtureId": 99
+        },
+        "score": {
+          "home": 0,
+          "away": 0
+        },
+        "status": "LIVE",
+        "kafkaOffset": 17
+      },
+      "text": ""
+    }
+  ]
+}

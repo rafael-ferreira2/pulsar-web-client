@@ -1,0 +1,76 @@
+{
+  "source": {
+    "bus": "pulsar",
+    "env": "staging",
+    "topic": "persistent://gcd/soccer-inbound/game-state",
+    "description": "Pulsar staging soccer gamestate (rendered output)."
+  },
+  "messagesReceived": 3,
+  "exportedAt": "2026-05-14T13:00:02.000Z",
+  "latest": {
+    "meta": {
+      "gameStateId": "g-42",
+      "fixtureId": "99",
+      "region": "EU"
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "LIVE",
+    "pulsarTimestamp": 1715587200000
+  },
+  "stream": [
+    {
+      "ts": "2026-05-14T12:59:55.000Z",
+      "decoded": {
+        "meta": {
+          "gameStateId": "g-42",
+          "fixtureId": "99",
+          "region": "EU"
+        },
+        "score": {
+          "home": 1,
+          "away": 0
+        },
+        "status": "LIVE",
+        "pulsarTimestamp": 1715587200000
+      },
+      "text": ""
+    },
+    {
+      "ts": "2026-05-14T13:00:00.000Z",
+      "decoded": {
+        "meta": {
+          "gameStateId": "g-42",
+          "fixtureId": "99",
+          "region": "EU"
+        },
+        "score": {
+          "home": 1,
+          "away": 0
+        },
+        "status": "LIVE",
+        "pulsarTimestamp": 1715587200000
+      },
+      "text": ""
+    },
+    {
+      "ts": "2026-05-14T13:00:05.000Z",
+      "decoded": {
+        "meta": {
+          "gameStateId": "g-42",
+          "fixtureId": "99",
+          "region": "EU"
+        },
+        "score": {
+          "home": 1,
+          "away": 0
+        },
+        "status": "LIVE",
+        "pulsarTimestamp": 1715587200000
+      },
+      "text": ""
+    }
+  ]
+}
