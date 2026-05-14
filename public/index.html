@@ -1825,5 +1825,19 @@ function renderDescription(text) {
   return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>');
 }
 </script>
+
+<!-- Team attribution — see .app-credit in shared.css. The chip is an <a>
+     so it's keyboard-focusable and routes to the team's Confluence page in
+     a new tab. Same markup mirrored on compare.html. -->
+<a class="app-credit"
+   href="https://fanduel.atlassian.net/wiki/spaces/SBK/pages/310921822686/Martians"
+   target="_blank" rel="noopener noreferrer"
+   role="link"
+   aria-label="Developed and owned by the Martians team — open team page on Confluence (new tab)"
+   title="Developed & owned by the Martians team · click to open the team page on Confluence">
+  <img src="/img/martians-logo.png" alt="Martians team logo" class="app-credit__logo">
+  <span class="app-credit__text-long">Developed &amp; owned by <span class="app-credit__team">Martians</span></span>
+  <span class="app-credit__text-short">&copy; <span class="app-credit__team">Martians</span></span>
+</a>
 </body>
 </html>

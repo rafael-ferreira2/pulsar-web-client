@@ -20,6 +20,16 @@
 
 <br>
 
+<sub>
+  <a href="https://fanduel.atlassian.net/wiki/spaces/SBK/pages/310921822686/Martians" target="_blank" rel="noopener noreferrer" title="Open the Martians team page on Confluence">
+    <img src="./public/img/martians-logo.png" alt="Martians team logo" width="22" valign="middle" />
+  </a>
+  &nbsp;Developed &amp; owned by
+  <a href="https://fanduel.atlassian.net/wiki/spaces/SBK/pages/310921822686/Martians" target="_blank" rel="noopener noreferrer" title="Open the Martians team page on Confluence"><b>Team Martians</b></a>
+</sub>
+
+<br><br>
+
 [![Node](https://img.shields.io/badge/Node.js-%E2%89%A518-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Apache Pulsar](https://img.shields.io/badge/Apache_Pulsar-188FFF?logo=apachepulsar&logoColor=white)](https://pulsar.apache.org)
 [![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org)
@@ -28,6 +38,7 @@
 [![Protobuf](https://img.shields.io/badge/Protobuf-4285F4?logo=googledatastudio&logoColor=white)](https://protobuf.dev)
 [![WebSocket](https://img.shields.io/badge/WebSocket-010101?logo=socketdotio&logoColor=white)](#)
 [![Brand](https://img.shields.io/badge/Brand-FanDuel%20Blue%20%231493FF-1493FF)](#)
+[![Team](https://img.shields.io/badge/Team-Martians-FF7A45?labelColor=1a0f08)](https://fanduel.atlassian.net/wiki/spaces/SBK/pages/310921822686/Martians)
 [![Status](https://img.shields.io/badge/Status-Internal_developer_tool-1493FF)](#)
 
 <br>
@@ -865,10 +876,30 @@ PulsarWebClient/
 
 ---
 
+## 👾 Developed & owned by Martians
+
 <div align="center">
+
+<a href="https://fanduel.atlassian.net/wiki/spaces/SBK/pages/310921822686/Martians" target="_blank" rel="noopener noreferrer" title="Open the Martians team page on Confluence">
+  <img src="./public/img/martians-logo.png" alt="Team Martians — click to open the team page on Confluence" width="160" />
+</a>
+
+### Team Martians
+
+<sub><b>FanDuel · GCD Streaming Platform</b></sub>
+
+<br>
+
+This client — the listener, the compare page, the export pipeline, the design system, the demo recordings — is **designed, developed, and owned by the Martians team**. Bug reports, feature requests, and onboarding questions all land with us.
+
+<sub>👉 <a href="https://fanduel.atlassian.net/wiki/spaces/SBK/pages/310921822686/Martians" target="_blank" rel="noopener noreferrer"><b>Visit the Martians team page on Confluence</b></a> for the team charter, on-call rota, and contact channels.</sub>
+
+<sub>The same attribution lives in-app as a chip in the bottom-right corner of every page (clickable, routes to the same Confluence page). See <code>.app-credit</code> in <code>public/shared.css</code> if you need to restyle it.</sub>
+
+<br>
 
 <sub>Built with 💙 for FanDuel · GCD Streaming · Pulsar + Kafka</sub>
 
-<sub>Brand assets live in <code>public/fanduel-*.png</code> · Design system in <code>public/shared.css</code> · Accent color <code>#1493FF</code></sub>
+<sub>Brand assets in <code>public/fanduel-*.png</code> &amp; <code>public/img/martians-logo.png</code> · Design system in <code>public/shared.css</code> · Accent <code>#1493FF</code> · Team accent <code>#FF7A45</code></sub>
 
 </div>

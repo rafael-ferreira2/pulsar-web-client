@@ -208,3 +208,84 @@ code, pre {
 
 /* ── Selection ──────────────────────────────────────────── */
 ::selection { background: rgba(20,147,255,.32); color: #fff; }
+
+/* ── Team credit (bottom-right, both pages) ─────────────────
+   A small, always-visible attribution chip. We anchor it to the
+   bottom-right of the viewport (not the document) so it stays
+   reachable inside the listener's flex shell and the compare
+   page's diff viewer without affecting either layout.
+
+   z-index sits *under* page dropdowns (which use 100) so menus
+   like the Export popover still cover it cleanly. backdrop-filter
+   gives it a frosted-glass feel against the dark canvas; we keep
+   a solid-ish background as the fallback for browsers (or content
+   blockers) that don't honour the filter. */
+.app-credit {
+  position: fixed;
+  right: 14px; bottom: 12px;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 5px 13px 5px 6px;
+  background: rgba(15, 27, 46, .82);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-size: 11px; font-weight: 500;
+  color: var(--text-muted); letter-spacing: .02em;
+  text-decoration: none; user-select: none;
+  z-index: 40;
+  cursor: pointer;
+  /* We intentionally don't transform the chip itself on hover — only the
+     logo grows — so the bottom-right anchor never appears to shift. */
+  transition: color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.app-credit:hover,
+.app-credit:focus-visible {
+  color: var(--text);
+  border-color: #ff7a45;          /* lights up with the team accent so it reads as an actionable link on hover */
+  box-shadow: 0 8px 24px rgba(255, 122, 69, .18);
+  outline: none;
+}
+.app-credit:focus-visible {
+  /* Keyboard-only focus ring — keep accessible without being visually loud */
+  box-shadow: 0 0 0 2px rgba(255, 122, 69, .55), 0 8px 24px rgba(255, 122, 69, .18);
+}
+.app-credit__logo {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #1a0f08;            /* matches the Martians shield interior so the PNG's transparent ring blends in */
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .5);
+  /* Grow from the chip's left edge so the chip's right anchor (the side that
+     touches the viewport edge) stays still while the logo pops outward. */
+  transform-origin: left center;
+  transition: transform .18s cubic-bezier(.2,.7,.3,1.4),
+              box-shadow .18s ease,
+              filter .18s ease;
+}
+.app-credit:hover .app-credit__logo,
+.app-credit:focus-visible .app-credit__logo {
+  transform: scale(1.45);
+  box-shadow: 0 6px 16px rgba(255, 122, 69, .45), 0 1px 4px rgba(0, 0, 0, .6);
+  filter: saturate(1.1);
+}
+.app-credit__team {
+  font-weight: 700;
+  color: #ff7a45;                 /* echoes the amber/orange in the Martians badge */
+  letter-spacing: .04em;
+}
+
+/* On narrow viewports collapse to a compact "© Martians" badge — the
+   logo carries the brand and the chip stops crowding the diff viewer. */
+@media (max-width: 720px) {
+  .app-credit { padding: 4px 10px 4px 5px; gap: 7px; font-size: 10.5px; right: 8px; bottom: 8px; }
+  .app-credit__logo { width: 24px; height: 24px; }
+  .app-credit__text-long { display: none; }
+  .app-credit:hover .app-credit__logo,
+  .app-credit:focus-visible .app-credit__logo { transform: scale(1.5); }
+}
+@media (min-width: 721px) {
+  .app-credit__text-short { display: none; }
+}
