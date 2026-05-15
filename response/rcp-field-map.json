@@ -1,0 +1,1867 @@
+{
+  "generatedAt": "2026-05-15T10:27:09.868Z",
+  "sources": {
+    "kafka": {
+      "file": "response/staging/kafka-kafka-stg-rcp-mirror-sgt-2026-05-15T10-07-00.json",
+      "bus": "kafka",
+      "env": "kafka-stg-rcp-mirror",
+      "topic": "trading.soccer.prd.sgt",
+      "messageCount": 10,
+      "exportedAt": "2026-05-15T10:07:00.208Z",
+      "decodedMessages": 10
+    },
+    "pulsar": {
+      "file": "response/staging/pulsar-staging-game-state-2026-05-15T10-06-55.json",
+      "bus": "pulsar",
+      "env": "staging",
+      "topic": "persistent://gcd/soccer-inbound/game-state",
+      "messageCount": 11,
+      "exportedAt": "2026-05-15T10:06:55.637Z",
+      "decodedMessages": 10
+    }
+  },
+  "rows": [
+    {
+      "path": "meta.version",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateMetaToMetaConverter.java:37",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"1.1.92\"",
+          "\"1.1.92\"",
+          "\"1.1.92\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"1.1.92\"",
+          "\"1.1.92\"",
+          "\"1.1.92\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "meta.gameStateId",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateMetaToMetaConverter.java:38",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "meta.highWaterMark",
+      "protoType": "int64",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Ordering / watermark; GameStateMetaToMetaConverter.java:39",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "number",
+            10
+          ]
+        ],
+        "sample": [
+          "4",
+          "1",
+          "2"
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "number",
+            10
+          ]
+        ],
+        "sample": [
+          "1",
+          "1",
+          "2"
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "meta.gameStatePreviousId",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateMetaToMetaConverter.java:40",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "meta.ingressCorrelationId",
+      "protoType": "string",
+      "rcpUsage": "correlation",
+      "hotPath": true,
+      "rcpReference": "GameStateMetaToMetaConverter.java:41",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"e4b0b25d-86e2-4722-b8a7-8fa0f882bc93\"",
+          "\"121a06fc-df49-4413-bf1c-92eb7da87e33\"",
+          "\"4e07a30c-06ce-4480-9aa0-ac0647677c9b\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"2b6f5245-0b05-423c-bead-c5946aee7898\"",
+          "\"798f239d-1d11-461a-8608-8eaeb1f0c2ba\"",
+          "\"c8219651-f7b9-42bf-8989-835c6d895082\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "meta.ingressCorrelationTimestamp",
+      "protoType": "string (RFC3339)",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Instant.parse(); GameStateToFootballFixtureConverter.java:132-134",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"2026-05-11T10:11:45.600799864Z\"",
+          "\"2026-05-11T10:11:47.011076325Z\"",
+          "\"2026-05-11T10:11:47.411460618Z\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"2026-05-14T08:06:03.414229Z\"",
+          "\"2026-05-14T08:07:15.660193600Z\"",
+          "\"2026-05-14T10:42:56.331474100Z\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "meta.instructionType",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateMetaToMetaConverter.java:44",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "meta.sport",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateMetaToMetaConverter.java:45",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "meta.headers",
+      "protoType": "map<string,string>",
+      "rcpUsage": "correlation",
+      "hotPath": true,
+      "rcpReference": "getHeadersMap(); EventDrivenMessageListener.java:37",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "meta.feedStatus[].provider",
+      "protoType": "enum (Provider)",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFeedStatusToFeedStatusConverter.java:38",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"UNKNOWN_PROVIDER\"",
+          "\"UNKNOWN_PROVIDER\"",
+          "\"UNKNOWN_PROVIDER\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"UNKNOWN_PROVIDER\"",
+          "\"UNKNOWN_PROVIDER\"",
+          "\"UNKNOWN_PROVIDER\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "meta.feedStatus[].status",
+      "protoType": "enum (Status)",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "GameStateStatusToStatusConverter.java:20",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "meta.feedStatus[].features.supportedIncidentTypes[].soccerIncidentType",
+      "protoType": "enum",
+      "rcpUsage": "filter",
+      "hotPath": true,
+      "rcpReference": "Supported incidents allow-list; GameStateToFixtureContextConverter.java:140-141",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 100,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            100
+          ]
+        ],
+        "sample": [
+          "\"UNCONFIRMED_SHOT\"",
+          "\"SHOT_OFF_TARGET\"",
+          "\"SHOT_SAVED\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 100,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            100
+          ]
+        ],
+        "sample": [
+          "\"UNCONFIRMED_SHOT\"",
+          "\"SHOT_OFF_TARGET\"",
+          "\"SHOT_SAVED\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "meta.feedStatus[].features.supportedStatTypes[].soccerStatType",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFeedFeaturesToFeaturesConverter.java:26",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.sportsBookId",
+      "protoType": "string",
+      "rcpUsage": "correlation",
+      "hotPath": true,
+      "rcpReference": "Kafka key / entity id; EventDrivenMessageListener.java:42",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"15716908\"",
+          "\"15719256\"",
+          "\"15717438\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"39995603\"",
+          "\"39959838\"",
+          "\"39996693\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "fixture.status",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateToFootballFixtureConverter.java:101",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.expectedStartTime.seconds",
+      "protoType": "google.protobuf.Timestamp.seconds",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateToFootballFixtureConverter.java:94",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"1778425200\"",
+          "\"1778509800\"",
+          "\"1778511600\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"1778767200\"",
+          "\"1778770800\"",
+          "\"1778756400\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "fixture.actualStartTime.seconds",
+      "protoType": "google.protobuf.Timestamp.seconds",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateToFootballFixtureConverter.java:78",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"1778425200\"",
+          "\"1778509800\"",
+          "\"1778511600\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"1778767200\"",
+          "\"1778770800\"",
+          "\"1778756400\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "fixture.expectedEndTime.seconds",
+      "protoType": "google.protobuf.Timestamp.seconds",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateToFootballFixtureConverter.java:86",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.externalRef[].provider",
+      "protoType": "enum (Provider)",
+      "rcpUsage": "filter",
+      "hotPath": true,
+      "rcpReference": "Filters on Provider.SPORTEX; GameStateToFootballFixtureConverter.java:107",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.externalRef[].externalId",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateToFootballFixtureConverter.java:108",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.group.id",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFixtureToFixtureGroupConverter.java:22",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.group.description",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFixtureToFixtureGroupConverter.java:23",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.attributes.soccerAttributes.penaltyShootoutFormat",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateToFootballFixtureConverter.java:125",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.attributes.soccerAttributes.homeParticipantRef",
+      "protoType": "string",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Side resolution; FootballConverter.java:13",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"294185\"",
+          "\"311107\"",
+          "\"61727\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"7639\"",
+          "\"2621\"",
+          "\"7865\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "fixture.attributes.soccerAttributes.awayParticipantRef",
+      "protoType": "string",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Side resolution; FootballConverter.java:17",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"107786\"",
+          "\"311108\"",
+          "\"16804\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 10,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            10
+          ]
+        ],
+        "sample": [
+          "\"5038\"",
+          "\"43033\"",
+          "\"4468\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "fixture.attributes.soccerAttributes.firstLegScore.homeParticipant",
+      "protoType": "int32",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFixtureToFootballFirstLegScoreConverter.java:32",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "fixture.attributes.soccerAttributes.firstLegScore.awayParticipant",
+      "protoType": "int32",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFixtureToFootballFirstLegScoreConverter.java:33",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].id",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballTeamConverter.java:45 / FootballPlayerConverter.java:41",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"294185\"",
+          "\"107786\"",
+          "\"311107\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"7639\"",
+          "\"5038\"",
+          "\"2621\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "participants[].name",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballTeamConverter.java:48",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"Swedru All Blacks\"",
+          "\"Bechem United\"",
+          "\"FC Asia Talas\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"Trelleborgs FF\"",
+          "\"Jönköpings Södra\"",
+          "\"Austria Wien II\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "participants[].type",
+      "protoType": "enum (TEAM|PLAYER)",
+      "rcpUsage": "filter",
+      "hotPath": true,
+      "rcpReference": "GameStateToFixtureContextConverter.java:68/74",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"TEAM\"",
+          "\"TEAM\"",
+          "\"TEAM\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"TEAM\"",
+          "\"TEAM\"",
+          "\"TEAM\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "participants[].externalRef[].provider",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballTeamConverter.java:52",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].externalRef[].externalId",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballTeamConverter.java:52",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].info.teamAttributes.soccerTeamAttributes.jerseyColour",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballTeamConverter.java:50",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].info.teamAttributes.soccerTeamAttributes.formation.value",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballTeamConverter.java:59 (hasFormation gate)",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"Null\"",
+          "\"Null\"",
+          "\"Null\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 10,
+        "valueCount": 20,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            20
+          ]
+        ],
+        "sample": [
+          "\"Null\"",
+          "\"Null\"",
+          "\"Null\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "participants[].info.playerAttributes.soccerPlayerAttributes.parentParticipantRef",
+      "protoType": "string",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "GameStateToFixtureContextConverter.java:103",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].info.playerAttributes.soccerPlayerAttributes.shirtNumber",
+      "protoType": "int32",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballPlayerConverter.java:50",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].info.playerAttributes.soccerPlayerAttributes.position",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballPlayerConverter.java:52-53",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].info.playerAttributes.soccerPlayerAttributes.playerPosition",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballPlayerConverter.java:55-56",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].info.playerAttributes.soccerPlayerAttributes.startingPosition",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballPlayerConverter.java:58-61",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "participants[].info.playerAttributes.soccerPlayerAttributes.formationPlace.value",
+      "protoType": "int32",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "FootballPlayerConverter.java:67 (hasFormationPlace gate)",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "incidents[].id",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateIncidentToFootballIncidentConverter.java:54",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 6,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            6
+          ]
+        ],
+        "sample": [
+          "\"4a0ce0a4-8010-4593-811a-4dd605378ee6\"",
+          "\"b1c54b81-fa99-47a6-9735-74fb146d16f1\"",
+          "\"f611bc48-45a6-4154-84c0-17ef1dd100cc\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 2,
+        "valueCount": 2,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            2
+          ]
+        ],
+        "sample": [
+          "\"a2845026-276c-4cff-89f9-cac7a033b244\"",
+          "\"a2845026-276c-4cff-89f9-cac7a033b244\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "incidents[].type.soccerIncidentType",
+      "protoType": "enum",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Routing key for incident-type converters; …ConverterStrategy.get(type)",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 6,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            6
+          ]
+        ],
+        "sample": [
+          "\"CANCELLED\"",
+          "\"CANCELLED\"",
+          "\"PERIOD_TRANSITION\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 2,
+        "valueCount": 2,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            2
+          ]
+        ],
+        "sample": [
+          "\"PERIOD_TRANSITION\"",
+          "\"PERIOD_TRANSITION\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "incidents[].time.soccerIncidentTime.period",
+      "protoType": "message (Period)",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "GameStateToFixtureContextConverter.java:121",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 6,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            6
+          ]
+        ],
+        "sample": [
+          "\"SECOND_HALF\"",
+          "\"SECOND_HALF\"",
+          "\"END_OF_MATCH\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 2,
+        "valueCount": 2,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            2
+          ]
+        ],
+        "sample": [
+          "\"FIRST_HALF\"",
+          "\"FIRST_HALF\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "incidents[].time.soccerIncidentTime.clock.minutes",
+      "protoType": "int32",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Sort + duration; GameStateToFixtureContextConverter.java:126-128",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 6,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "number",
+            6
+          ]
+        ],
+        "sample": [
+          "77",
+          "89",
+          "90"
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical (k-only data sample)",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "! only-in-Kafka-sample"
+    },
+    {
+      "path": "incidents[].time.soccerIncidentTime.clock.seconds",
+      "protoType": "int32",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Sort + duration; GameStateToFixtureContextConverter.java:126-128",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 2,
+        "valueCount": 2,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "number",
+            2
+          ]
+        ],
+        "sample": [
+          "1",
+          "1"
+        ]
+      },
+      "namingMatch": "identical (p-only data sample)",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "! only-in-Pulsar-sample"
+    },
+    {
+      "path": "incidents[].participantRef[]",
+      "protoType": "repeated string",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Player attribution; many incident converters",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 4,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            4
+          ]
+        ],
+        "sample": [
+          "\"107786\"",
+          "\"294185\"",
+          "\"107786\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical (k-only data sample)",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "! only-in-Kafka-sample"
+    },
+    {
+      "path": "incidents[].externalRef[].provider",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateIncidentToFootballIncidentConverter.java:60",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 4,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            4
+          ]
+        ],
+        "sample": [
+          "\"UNKNOWN_PROVIDER\"",
+          "\"UNKNOWN_PROVIDER\"",
+          "\"UNKNOWN_PROVIDER\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical (k-only data sample)",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "! only-in-Kafka-sample"
+    },
+    {
+      "path": "incidents[].externalRef[].externalId",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateIncidentToFootballIncidentConverter.java:60",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 4,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            4
+          ]
+        ],
+        "sample": [
+          "\"4a0ce0a4-8010-4593-811a-4dd605378ee6\"",
+          "\"b1c54b81-fa99-47a6-9735-74fb146d16f1\"",
+          "\"4a0ce0a4-8010-4593-811a-4dd605378ee6\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical (k-only data sample)",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "! only-in-Kafka-sample"
+    },
+    {
+      "path": "incidents[].lastModified",
+      "protoType": "google.protobuf.Timestamp",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "Timestamps.toMillis(); GameStateIncidentToFootballDurationConverter.java:57",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "incidents[].qualifiers.soccerIncidentQualifiers.qualifiers[].qualifier",
+      "protoType": "enum",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Filter by qualifier (ASSISTANT_PARTICIPANT_REF, FOUL_WON, INJURY_TIME_UPDATE, SHOOTOUT_ATTEMPT_STATE, EXTRA_TIME_QUALIFIERS, OUT_PARTICIPANT_REF…)",
+      "kafka": {
+        "presentMsgs": 2,
+        "valueCount": 2,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            2
+          ]
+        ],
+        "sample": [
+          "\"END_OF_MATCH\"",
+          "\"END_OF_MATCH\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 2,
+        "valueCount": 2,
+        "nonDefaultMsgs": 2,
+        "types": [
+          [
+            "string",
+            2
+          ]
+        ],
+        "sample": [
+          "\"START_OF_FIRST_HALF\"",
+          "\"START_OF_FIRST_HALF\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "incidents[].qualifiers.soccerIncidentQualifiers.qualifiers[].value",
+      "protoType": "string",
+      "rcpUsage": "business",
+      "hotPath": true,
+      "rcpReference": "Numeric-as-string in some cases (Integer.parseInt)",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "incidents[].qualifiers.soccerIncidentQualifiers.qualifiers[].details.foulWonDetails.playerId.value",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateIncidentToFootballFoulIncidentConverter.java:67",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "stats.matchStat[].participantRef",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFixtureStatsToFootballStatsConverter.java:49",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 60,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            60
+          ]
+        ],
+        "sample": [
+          "\"107786\"",
+          "\"107786\"",
+          "\"107786\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 8,
+        "valueCount": 48,
+        "nonDefaultMsgs": 8,
+        "types": [
+          [
+            "string",
+            48
+          ]
+        ],
+        "sample": [
+          "\"4468\"",
+          "\"4468\"",
+          "\"4468\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "stats.matchStat[].type.soccerStatType",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFixtureStatsToFootballStatsConverter.java:50",
+      "kafka": {
+        "presentMsgs": 10,
+        "valueCount": 60,
+        "nonDefaultMsgs": 10,
+        "types": [
+          [
+            "string",
+            60
+          ]
+        ],
+        "sample": [
+          "\"BALL_POSSESSION\"",
+          "\"ATTACKS\"",
+          "\"DANGEROUS_ATTACKS\""
+        ]
+      },
+      "pulsar": {
+        "presentMsgs": 8,
+        "valueCount": 48,
+        "nonDefaultMsgs": 8,
+        "types": [
+          [
+            "string",
+            48
+          ]
+        ],
+        "sample": [
+          "\"BALL_POSSESSION\"",
+          "\"ATTACKS\"",
+          "\"DANGEROUS_ATTACKS\""
+        ]
+      },
+      "namingMatch": "identical",
+      "typeMatch": "match",
+      "verdict": "✓ both populated"
+    },
+    {
+      "path": "stats.matchStat[].value",
+      "protoType": "double",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "cast (int) stat.getValue(); …:51",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 8,
+        "valueCount": 16,
+        "nonDefaultMsgs": 8,
+        "types": [
+          [
+            "number",
+            16
+          ]
+        ],
+        "sample": [
+          "50",
+          "50",
+          "50"
+        ]
+      },
+      "namingMatch": "identical (p-only data sample)",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "! only-in-Pulsar-sample"
+    },
+    {
+      "path": "stats.periodStat[].period.soccerPeriod",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "GameStateFixtureStatsToFootballStatsConverter.java:57",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "stats.periodStat[].stat.matchStat[].participantRef",
+      "protoType": "string",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "Nested through convertStat()",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "stats.periodStat[].stat.matchStat[].type.soccerStatType",
+      "protoType": "enum",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "Nested through convertStat()",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    },
+    {
+      "path": "stats.periodStat[].stat.matchStat[].value",
+      "protoType": "double",
+      "rcpUsage": "mapping",
+      "hotPath": true,
+      "rcpReference": "Nested through convertStat()",
+      "kafka": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "pulsar": {
+        "presentMsgs": 0,
+        "valueCount": 0,
+        "nonDefaultMsgs": 0,
+        "types": [],
+        "sample": []
+      },
+      "namingMatch": "identical",
+      "typeMatch": "n/a (no data on one side)",
+      "verdict": "— upstream-empty"
+    }
+  ]
+}

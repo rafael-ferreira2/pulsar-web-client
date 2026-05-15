@@ -177,6 +177,310 @@
     .stat-dot.idle { background: var(--border-strong); }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
 
+    /* ── Migration readiness — prominent banner + centered modal ───────
+       A full-width banner sits between the stats strip and the tabs and
+       acts as a traffic-light: a single, unmissable signal of whether the
+       currently selected Kafka↔Pulsar pair is safe to migrate. Clicking
+       anywhere on the banner opens the centered details modal.
+
+       States (4) intentionally render with 2 strong visual buckets:
+         • green   → GO. All RCP-required fields populate on Pulsar.
+         • amber   → GO WITH CAVEATS. Important fields missing.
+         • red     → STOP. ≥1 critical RCP field missing in Pulsar.
+         • pending → Gathering data.
+    */
+    .migration-banner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      width: calc(100% - 36px);
+      margin: 10px 18px 0 18px;
+      padding: 10px 14px 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-elev-2);
+      color: var(--text);
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
+    }
+    .migration-banner[hidden] { display: none !important; }   /* honour HTML hidden over the grid above */
+    .migration-banner::before {
+      content: ''; position: absolute; inset: 0 auto 0 0;
+      width: 4px; background: var(--border-strong);
+      transition: background .14s ease;
+    }
+    .migration-banner:hover    { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+    .migration-banner:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--primary-hi); }
+    .migration-banner .mb-light {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+      background: var(--bg-elev); border: 1px solid var(--border);
+      transition: background .14s ease, color .14s ease, border-color .14s ease, box-shadow .14s ease;
+      flex-shrink: 0;
+    }
+    .migration-banner .mb-text  { display: flex; flex-direction: column; min-width: 0; text-align: left; gap: 2px; }
+    .migration-banner .mb-title {
+      display: block;
+      font-size: 12.5px; font-weight: 800; letter-spacing: .03em;
+      text-transform: uppercase; line-height: 1.15; color: var(--text);
+    }
+    .migration-banner .mb-sub {
+      display: block;
+      color: var(--text-muted); font-size: 11.5px;
+      line-height: 1.4;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .migration-banner .mb-meta {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 4px; flex-wrap: wrap;
+    }
+    .migration-banner .mb-meta:empty { display: none; }
+    .migration-banner .mb-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 1px 7px; border-radius: 999px;
+      background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .03em;
+      line-height: 1.6;
+    }
+    .migration-banner .mb-tag.crit  { color: #ff9b9b; border-color: rgba(255,82,82,.45); }
+    .migration-banner .mb-tag.imp   { color: #ffc777; border-color: rgba(255,176,32,.45); }
+    .migration-banner .mb-tag.ok    { color: #7fe9a9; border-color: rgba(45,212,123,.45); }
+    .migration-banner .mb-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 10px; border-radius: 6px;
+      background: var(--bg-elev); border: 1px solid var(--border-strong);
+      color: var(--text); font-size: 11px; font-weight: 700;
+      letter-spacing: .02em;
+      transition: background .12s ease, border-color .12s ease;
+      flex-shrink: 0;
+    }
+    .migration-banner:hover .mb-cta { background: var(--bg-elev-3, var(--bg-elev)); border-color: var(--primary); }
+    .migration-banner .mb-cta .mb-cta-arrow { font-size: 12px; line-height: 1; }
+
+    /* Per-state look — strong visual difference between GO (green) and the
+       rest. Amber leans warm-warning, red leans alarming, pending leans
+       calm/informational. */
+    .migration-banner[data-state="green"]   { border-color: rgba(45,212,123,.55); background: linear-gradient(90deg, rgba(45,212,123,.10), rgba(45,212,123,.02) 60%, var(--bg-elev-2)); }
+    .migration-banner[data-state="green"]::before  { background: var(--success); box-shadow: 0 0 18px rgba(45,212,123,.55); }
+    .migration-banner[data-state="green"]   .mb-light { background: rgba(45,212,123,.18); color: var(--success); border-color: rgba(45,212,123,.55); box-shadow: 0 0 18px rgba(45,212,123,.35); }
+    .migration-banner[data-state="amber"]   { border-color: rgba(255,176,32,.55); background: linear-gradient(90deg, rgba(255,176,32,.10), rgba(255,176,32,.02) 60%, var(--bg-elev-2)); }
+    .migration-banner[data-state="amber"]::before  { background: var(--warning); box-shadow: 0 0 18px rgba(255,176,32,.55); }
+    .migration-banner[data-state="amber"]   .mb-light { background: rgba(255,176,32,.18); color: var(--warning); border-color: rgba(255,176,32,.55); box-shadow: 0 0 18px rgba(255,176,32,.35); }
+    .migration-banner[data-state="red"]     { border-color: rgba(255,82,82,.55);  background: linear-gradient(90deg, rgba(255,82,82,.12), rgba(255,82,82,.02) 60%, var(--bg-elev-2)); }
+    .migration-banner[data-state="red"]::before    { background: var(--error); box-shadow: 0 0 18px rgba(255,82,82,.55); }
+    .migration-banner[data-state="red"]     .mb-light { background: rgba(255,82,82,.18); color: var(--error); border-color: rgba(255,82,82,.55); box-shadow: 0 0 18px rgba(255,82,82,.35); }
+    .migration-banner[data-state="pending"] { border-color: rgba(20,147,255,.45); background: linear-gradient(90deg, rgba(20,147,255,.10), rgba(20,147,255,.02) 60%, var(--bg-elev-2)); }
+    .migration-banner[data-state="pending"]::before{ background: var(--primary); animation: blink 1.4s infinite; }
+    .migration-banner[data-state="pending"] .mb-light { background: rgba(20,147,255,.18); color: var(--primary); border-color: rgba(20,147,255,.55); animation: blink 1.4s infinite; }
+
+    /* Modal — centered, dimmed backdrop, generous reading width. */
+    .migration-overlay {
+      position: fixed; inset: 0;
+      background: rgba(5, 10, 22, .60);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      z-index: 60;
+      opacity: 0; transition: opacity .18s ease;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 48px 24px 24px 24px;
+      overflow-y: auto;
+    }
+    /* CRITICAL: without this rule, the `display: flex` above defeats the
+       HTML `hidden` attribute and the invisible overlay (opacity:0) sits on
+       top of the whole page eating every click — which previously prevented
+       the topic / bus / position selects from responding. */
+    .migration-overlay[hidden] { display: none !important; }
+    .migration-overlay[data-open="true"] { opacity: 1; }
+    .migration-panel {
+      position: relative;
+      width: min(960px, 100%);
+      max-height: calc(100vh - 72px);
+      background: var(--bg-elev); border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+      display: flex; flex-direction: column;
+      transform: translateY(20px) scale(.98); opacity: 0;
+      transition: transform .22s cubic-bezier(.2,.7,.3,1), opacity .18s ease;
+      z-index: 61;
+    }
+    .migration-panel[data-open="true"] { transform: translateY(0) scale(1); opacity: 1; }
+    .migration-panel-head {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 18px 22px 14px 22px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--bg-elev-2), var(--bg-elev));
+      border-radius: 14px 14px 0 0;
+      flex-shrink: 0;
+    }
+    .migration-panel-titles { flex: 1; min-width: 0; }
+    .migration-panel-eyebrow {
+      color: var(--text-dim); font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px;
+    }
+    .migration-panel-titles h2 {
+      font-size: 18px; font-weight: 700; color: var(--text);
+      letter-spacing: -.01em; margin: 0;
+    }
+    .migration-panel-sub {
+      color: var(--text-muted); font-size: 12px; margin-top: 5px; line-height: 1.45;
+    }
+    .migration-panel-body {
+      padding: 18px 22px 22px 22px; overflow-y: auto; flex: 1;
+    }
+
+    /* "What RCP needs from Kafka" summary cards inside the modal. */
+    .mig-needs-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin: 14px 0 18px;
+    }
+    .mig-needs-card {
+      padding: 12px 14px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-elev-2);
+      position: relative; overflow: hidden;
+    }
+    .mig-needs-card::before {
+      content: ''; position: absolute; inset: 0 auto 0 0;
+      width: 4px;
+      background: var(--border-strong);
+    }
+    .mig-needs-card.crit::before { background: var(--error);   box-shadow: 0 0 14px rgba(255,82,82,.45); }
+    .mig-needs-card.imp::before  { background: var(--warning); box-shadow: 0 0 14px rgba(255,176,32,.45); }
+    .mig-needs-card.info::before { background: var(--primary); box-shadow: 0 0 14px rgba(20,147,255,.35); }
+    .mig-needs-card .mnc-label {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .mig-needs-card .mnc-fraction {
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.02em;
+      margin-top: 4px; display: flex; align-items: baseline; gap: 6px;
+    }
+    .mig-needs-card .mnc-fraction .mnc-of {
+      font-size: 13px; color: var(--text-dim); font-weight: 600;
+    }
+    .mig-needs-card .mnc-help {
+      font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;
+    }
+    .mig-needs-card.gap   .mnc-fraction { color: var(--error); }
+    .mig-needs-card.warn  .mnc-fraction { color: var(--warning); }
+    .mig-needs-card.ok    .mnc-fraction { color: var(--success); }
+
+    /* Headline verdict card inside the panel. */
+    .mig-verdict {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 14px;
+      align-items: center;
+      padding: 14px 16px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-elev-2);
+      margin-bottom: 16px;
+    }
+    .mig-verdict[data-state="green"] { border-color: rgba(45,212,123,.45); background: rgba(45,212,123,.06); }
+    .mig-verdict[data-state="amber"] { border-color: rgba(255,176,32,.45); background: rgba(255,176,32,.06); }
+    .mig-verdict[data-state="red"]   { border-color: rgba(255,82,82,.45);  background: rgba(255,82,82,.06); }
+    .mig-verdict[data-state="pending"] { border-color: rgba(20,147,255,.45); background: rgba(20,147,255,.06); }
+    .mig-verdict .mv-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800;
+    }
+    .mig-verdict[data-state="green"] .mv-icon { background: rgba(45,212,123,.18); color: var(--success); }
+    .mig-verdict[data-state="amber"] .mv-icon { background: rgba(255,176,32,.18); color: var(--warning); }
+    .mig-verdict[data-state="red"]   .mv-icon { background: rgba(255,82,82,.18);  color: var(--error); }
+    .mig-verdict[data-state="pending"] .mv-icon { background: rgba(20,147,255,.18); color: var(--primary); }
+    .mig-verdict .mv-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .mig-verdict .mv-sub   { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+    .mig-verdict .mv-score {
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 24px; font-weight: 800; color: var(--text);
+      letter-spacing: -.02em;
+    }
+    .mig-verdict .mv-score-sub {
+      font-size: 10.5px; color: var(--text-dim); text-align: right;
+      text-transform: uppercase; letter-spacing: .06em; font-weight: 700; margin-top: 2px;
+    }
+
+    /* Per-severity tally bar. */
+    .mig-tally {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      margin-bottom: 18px;
+    }
+    .mig-tally-cell {
+      padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-elev-2);
+    }
+    .mig-tally-cell .mt-label {
+      color: var(--text-dim); font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+    .mig-tally-cell .mt-value {
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 18px; font-weight: 700; color: var(--text); margin-top: 4px;
+    }
+    .mig-tally-cell.crit .mt-label { color: #ff8a8a; }
+    .mig-tally-cell.imp  .mt-label { color: #ffbe5e; }
+    .mig-tally-cell.info .mt-label { color: var(--primary); }
+
+    /* Field-by-field table. */
+    .mig-section-title {
+      font-size: 11px; font-weight: 700; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin: 16px 0 8px; display: flex; align-items: center; gap: 10px;
+    }
+    .mig-section-title .pill {
+      padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border);
+      font-size: 10px; color: var(--text-muted); font-weight: 700;
+      text-transform: none; letter-spacing: .02em;
+    }
+    .mig-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 11.5px; background: var(--bg-elev-2);
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .mig-table th, .mig-table td {
+      padding: 7px 10px; border-bottom: 1px solid var(--border);
+      text-align: left; vertical-align: top;
+    }
+    .mig-table th {
+      background: var(--bg);
+      color: var(--text-dim); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .05em; font-size: 10px;
+    }
+    .mig-table tr:last-child td { border-bottom: none; }
+    .mig-table td.path code {
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 11px;
+      color: var(--text); background: transparent; padding: 0;
+    }
+    .mig-table td.meta { color: var(--text-muted); font-size: 10.5px; }
+    .mig-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 1px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 700; letter-spacing: .03em;
+      border: 1px solid;
+    }
+    .mig-pill.ok      { color: var(--success); border-color: rgba(45,212,123,.45); background: rgba(45,212,123,.10); }
+    .mig-pill.warn    { color: var(--warning); border-color: rgba(255,176,32,.45); background: rgba(255,176,32,.10); }
+    .mig-pill.err     { color: var(--error);   border-color: rgba(255,82,82,.45);  background: rgba(255,82,82,.10); }
+    .mig-pill.neutral { color: var(--text-dim);border-color: var(--border);        background: var(--bg-elev); }
+    .mig-pill.bonus   { color: var(--primary); border-color: rgba(20,147,255,.45); background: rgba(20,147,255,.10); }
+
+    .mig-recs {
+      margin-top: 14px; padding: 12px 14px;
+      border: 1px dashed var(--border-strong); border-radius: 8px;
+      color: var(--text-muted); font-size: 11.5px; line-height: 1.55;
+    }
+    .mig-recs strong { color: var(--text); }
+    .mig-recs ul { margin: 6px 0 0 18px; }
+    .mig-recs li + li { margin-top: 4px; }
+
+    .mig-empty {
+      text-align: center; padding: 40px 16px;
+      color: var(--text-muted); font-size: 12px;
+    }
+    .mig-empty .me-icon { font-size: 28px; margin-bottom: 8px; opacity: .55; }
+
     /* ── Tabs ── */
     #tabs {
       display: flex; padding: 0 18px;
@@ -677,6 +981,55 @@
   </span>
 </div>
 
+<!--
+  Migration-readiness banner. Hidden until the current A↔B selection matches
+  a known Kafka↔Pulsar pair in migration-pairs.json. Renders as a prominent
+  traffic-light card (green / amber / red / pending). Clicking anywhere on
+  the card opens the centered details modal below.
+-->
+<button type="button"
+        id="migration-banner"
+        class="migration-banner"
+        hidden
+        onclick="toggleMigrationPanel(true)"
+        aria-haspopup="dialog"
+        aria-controls="migration-panel"
+        aria-label="Migration readiness — click for details">
+  <span class="mb-light" id="mb-light">·</span>
+  <span class="mb-text">
+    <span class="mb-title" id="mb-title">Migration readiness</span>
+    <span class="mb-sub"   id="mb-sub">Pick a Kafka topic on one side and its Pulsar mirror on the other to see whether RCP can safely cut over.</span>
+    <span class="mb-meta"  id="mb-meta"></span>
+  </span>
+  <span class="mb-cta">View details <span class="mb-cta-arrow">→</span></span>
+</button>
+
+<!--
+  Migration readiness details modal. Centered overlay; rendered fresh by
+  renderMigrationPanel() each time it opens so it reflects the latest live
+  field-presence evaluation. Sections in order:
+    1. Verdict card (large)
+    2. "What RCP needs from Kafka" three-card summary (critical/important/info)
+    3. Per-severity field tables (gaps first)
+    4. Recommendations + audit references
+-->
+<div id="migration-overlay" class="migration-overlay" hidden onclick="onMigrationOverlayClick(event)">
+  <aside id="migration-panel" class="migration-panel"
+         role="dialog" aria-modal="true" aria-labelledby="migration-panel-title">
+    <header class="migration-panel-head">
+      <div class="migration-panel-titles">
+        <div class="migration-panel-eyebrow" id="migration-panel-eyebrow">Migration readiness</div>
+        <h2 id="migration-panel-title">—</h2>
+        <p class="migration-panel-sub" id="migration-panel-sub">—</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="toggleMigrationPanel(false)" aria-label="Close" id="migration-panel-close">Close</button>
+    </header>
+    <div class="migration-panel-body" id="migration-panel-body">
+      <!-- Filled by renderMigrationPanel() -->
+    </div>
+  </aside>
+</div>
+
 <!-- ═══ Tabs ═══ -->
 <div id="tabs">
   <div class="tab active" data-tab="diff"     onclick="switchTab('diff')"     id="tab-diff"></div>
@@ -1061,6 +1414,7 @@ function onTopicChange(s) {
   updateCredNote(s);
   updateDescription(s);
   updateLabels();
+  if (typeof migrationRecheck === 'function') migrationRecheck();
 }
 
 function updateDescription(s) {
@@ -1196,6 +1550,7 @@ function resetAll() {
   document.getElementById('cnt-pairs').textContent = '0';
   document.getElementById('cnt-key').textContent   = '—';
   document.getElementById('cnt-time').textContent  = '—';
+  if (typeof migrationRecheck === 'function') migrationRecheck();
   lineDiffPick.a = 'latest'; lineDiffPick.b = 'latest'; lineDiffPick.pair = '';
   renderDiff();
   renderPairs();
@@ -1261,6 +1616,7 @@ function handleMsg(s, d) {
   updatePairPill();
   populateLineDiffPickers();
   if (activeTab === 'linediff') renderLineDiff();
+  if (typeof migDebouncedRecheck === 'function') migDebouncedRecheck();
 }
 
 function tryParseJson(text) {
@@ -2600,6 +2956,507 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+// ═══════════════════════════════════════════════════════════
+// Migration readiness engine
+// ═══════════════════════════════════════════════════════════
+// Loads `migration-pairs.json` once on page init, then for every change to
+// the active source selection (bus/env/topic) and every new decoded message
+// it re-scores the active pair and updates two UI surfaces:
+//   1. A prominent traffic-light banner above the comparison view
+//      (green / amber / red / pending). Whole banner is the click target.
+//   2. A centered detail modal with the "What RCP needs from Kafka — is it
+//      in Pulsar?" summary cards, the field-by-field tables, severity
+//      tally, and a per-pair recommendation block.
+//
+// Severity model and verdict rules (mirror migration-pairs.json):
+//   • critical   — RCP business / correlation / filter input.
+//   • important — RCP mapping / enrichment.
+//   • info      — Rarely populated optionals.
+//
+// Per-field verdicts compare *populated counts* between the Kafka side and
+// the Pulsar side. A field is "Pulsar-missing" when Kafka shows it but
+// Pulsar doesn't (within the captured window) — this is the only failure
+// mode that matters for cutover.
+
+let MIG_PAIRS = [];             // Loaded from /api/migration-pairs
+let MIG_PANEL_OPEN = false;
+let MIG_LAST_RENDER = null;     // Cached so we can re-render when the panel is opened
+let MIG_DEBOUNCE = null;
+
+async function loadMigrationPairs() {
+  try {
+    const j = await fetch('/api/migration-pairs').then(r => r.json());
+    MIG_PAIRS = Array.isArray(j?.pairs) ? j.pairs : [];
+  } catch {
+    MIG_PAIRS = [];
+  }
+  migrationRecheck();
+}
+
+// ── Path resolution (mirror of test/rcp-field-map.js) ─────────────────────
+function migSplitPath(p) {
+  // 'incidents[].time.clock.minutes' → ['incidents','[]','time','clock','minutes']
+  const out = [];
+  let buf = '';
+  for (let i = 0; i < p.length; i++) {
+    const c = p[i];
+    if (c === '.')                              { if (buf) out.push(buf); buf = ''; continue; }
+    if (c === '[' && p[i + 1] === ']')          { if (buf) out.push(buf); out.push('[]'); buf = ''; i++; continue; }
+    buf += c;
+  }
+  if (buf) out.push(buf);
+  return out;
+}
+
+function migResolve(root, segments) {
+  let cur = [root];
+  for (const seg of segments) {
+    const next = [];
+    if (seg === '[]') {
+      for (const c of cur) if (Array.isArray(c)) for (const x of c) next.push(x);
+    } else {
+      for (const c of cur) {
+        if (c !== null && typeof c === 'object' && !Array.isArray(c) &&
+            Object.prototype.hasOwnProperty.call(c, seg)) {
+          next.push(c[seg]);
+        }
+      }
+    }
+    cur = next;
+    if (!cur.length) break;
+  }
+  return cur;
+}
+
+function migIsDefault(v) {
+  if (v === undefined || v === null) return true;
+  if (v === '' || v === 0 || v === '0' || v === false) return true;
+  if (Array.isArray(v) && v.length === 0) return true;
+  if (typeof v === 'object' && Object.keys(v).length === 0) return true;
+  return false;
+}
+
+function migClassify(v) {
+  if (v === null) return 'null';
+  if (Array.isArray(v)) return v.length === 0 ? 'array<empty>' : 'array';
+  return typeof v;
+}
+
+// ── Pair detection ────────────────────────────────────────────────────────
+// A pair is "active" when one side resolves a Kafka topic matching the
+// pair's kafka endpoint and the other side resolves a Pulsar topic matching
+// the pair's pulsar endpoint. We accept either A=Kafka/B=Pulsar or the
+// inverse so users don't have to remember which goes where.
+function migMatchEndpoint(side, endpoint) {
+  if (!side?.topic) return false;
+  const tid  = String(side.topic.id   || '');
+  const path = String(side.topic.topic || '');
+  const idHit   = endpoint.topicIdContains   && tid.toLowerCase().includes(String(endpoint.topicIdContains).toLowerCase());
+  const pathHit = endpoint.topicPathContains && path.toLowerCase().includes(String(endpoint.topicPathContains).toLowerCase());
+  // Both fields are optional; at least one substring must hit.
+  return idHit || pathHit;
+}
+
+function migDetectPair() {
+  if (!MIG_PAIRS.length) return null;
+  for (const pair of MIG_PAIRS) {
+    const aKafka = side.a.bus === 'kafka'  && migMatchEndpoint(side.a, pair.endpoints.kafka);
+    const bKafka = side.b.bus === 'kafka'  && migMatchEndpoint(side.b, pair.endpoints.kafka);
+    const aPulsar = side.a.bus === 'pulsar' && migMatchEndpoint(side.a, pair.endpoints.pulsar);
+    const bPulsar = side.b.bus === 'pulsar' && migMatchEndpoint(side.b, pair.endpoints.pulsar);
+    if (aKafka && bPulsar) return { pair, kafka: 'a', pulsar: 'b' };
+    if (bKafka && aPulsar) return { pair, kafka: 'b', pulsar: 'a' };
+  }
+  return null;
+}
+
+// ── Evaluation ────────────────────────────────────────────────────────────
+function migEvaluate(detected) {
+  const { pair, kafka: kSide, pulsar: pSide } = detected;
+  const kMsgs = (side[kSide].msgs || []).map(m => m.decoded).filter(Boolean);
+  const pMsgs = (side[pSide].msgs || []).map(m => m.decoded).filter(Boolean);
+  const minMsgs = pair.evaluation?.minMessagesPerSide ?? 3;
+
+  const fields = pair.fields.map(f => {
+    const segs = migSplitPath(f.path);
+    let kPop = 0, pPop = 0;
+    const kTypes = new Set(), pTypes = new Set();
+    let kSample = null, pSample = null;
+    for (const root of kMsgs) {
+      const vs = migResolve(root, segs);
+      let any = false;
+      for (const v of vs) {
+        if (!migIsDefault(v)) {
+          any = true;
+          kTypes.add(migClassify(v));
+          if (kSample === null && (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')) kSample = v;
+        }
+      }
+      if (any) kPop++;
+    }
+    for (const root of pMsgs) {
+      const vs = migResolve(root, segs);
+      let any = false;
+      for (const v of vs) {
+        if (!migIsDefault(v)) {
+          any = true;
+          pTypes.add(migClassify(v));
+          if (pSample === null && (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')) pSample = v;
+        }
+      }
+      if (any) pPop++;
+    }
+
+    // Per-field verdict.
+    //   match    — both sides see it populated; Pulsar carries the field
+    //   neutral  — neither side populates it (upstream-empty; not a regression)
+    //   bonus    — only Pulsar populated (cannot regress a missing Kafka field)
+    //   gap      — only Kafka populated → potential parity gap
+    let verdict = 'neutral';
+    if (kPop && pPop)        verdict = 'match';
+    else if (!kPop && pPop)  verdict = 'bonus';
+    else if (kPop && !pPop)  verdict = 'gap';
+
+    // Type-mismatch detection (only meaningful when both sides see data).
+    let typeOk = true;
+    if (verdict === 'match') {
+      const norm = t => (t === 'array<empty>' ? 'array' : t);
+      const k = new Set([...kTypes].map(norm));
+      const p = new Set([...pTypes].map(norm));
+      typeOk = [...k].every(t => p.has(t)) && [...p].every(t => k.has(t));
+    }
+
+    return {
+      ...f,
+      kPop, pPop,
+      kTypes: [...kTypes], pTypes: [...pTypes],
+      kSample, pSample,
+      verdict, typeOk
+    };
+  });
+
+  // Tally by severity.
+  const tally = {
+    critical:  { total: 0, match: 0, neutral: 0, gap: 0, bonus: 0, typeMismatch: 0 },
+    important: { total: 0, match: 0, neutral: 0, gap: 0, bonus: 0, typeMismatch: 0 },
+    info:      { total: 0, match: 0, neutral: 0, gap: 0, bonus: 0, typeMismatch: 0 }
+  };
+  for (const f of fields) {
+    const t = tally[f.severity] || tally.info;
+    t.total++;
+    t[f.verdict]++;
+    if (!f.typeOk) t.typeMismatch++;
+  }
+
+  // Headline state.
+  let state, label, headline;
+  const haveEnough = kMsgs.length >= minMsgs && pMsgs.length >= minMsgs;
+  if (!haveEnough) {
+    state = 'pending';
+    label = `Gathering data · ${pMsgs.length}/${minMsgs} Pulsar · ${kMsgs.length}/${minMsgs} Kafka`;
+    headline = 'Awaiting more messages to score parity reliably.';
+  } else if (tally.critical.gap > 0 || tally.critical.typeMismatch > 0) {
+    state = 'red';
+    label = `BLOCKED · ${tally.critical.gap} critical gap${tally.critical.gap === 1 ? '' : 's'}`;
+    headline = 'One or more critical RCP-consumed fields are present in Kafka but not in Pulsar (or differ in type). Do not migrate yet.';
+  } else if (tally.important.gap > 0 || tally.important.typeMismatch > 0) {
+    state = 'amber';
+    label = `WARN · ${tally.important.gap} important gap${tally.important.gap === 1 ? '' : 's'}`;
+    headline = 'All critical fields match. Some mapping-tier fields show Kafka-only — downstream loses enrichment data but RCP will not crash. Capture a richer window or accept the gap.';
+  } else {
+    state = 'green';
+    label = `READY · ${tally.critical.match + tally.critical.neutral}/${tally.critical.total} critical OK`;
+    headline = 'All RCP-required fields have parity. You can plan cutover with confidence (re-verify deserializer wiring + capture richer fixture coverage first).';
+  }
+
+  return {
+    pair, kSide, pSide,
+    counts: { kafka: kMsgs.length, pulsar: pMsgs.length, minMsgs },
+    fields, tally, state, label, headline,
+    evaluatedAt: new Date()
+  };
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+const MIG_STATE_COPY = {
+  green:   { icon: '✓', title: 'Ready to migrate',         sub: 'All RCP-required fields are present on the Pulsar side.' },
+  amber:   { icon: '!', title: 'Migrate with caveats',     sub: 'All critical fields parity-check OK, but some important fields are missing on Pulsar.' },
+  red:     { icon: '✕', title: 'Do not migrate yet',       sub: 'One or more critical RCP fields are missing on the Pulsar side.' },
+  pending: { icon: '⏳', title: 'Gathering data…',          sub: 'Need a few more decoded messages on both sides to score reliably.' }
+};
+
+function migrationRecheck() {
+  const banner = document.getElementById('migration-banner');
+  const detected = migDetectPair();
+  if (!detected) {
+    banner.hidden = true;
+    if (MIG_PANEL_OPEN) toggleMigrationPanel(false);
+    MIG_LAST_RENDER = null;
+    return;
+  }
+  const analysis = migEvaluate(detected);
+  MIG_LAST_RENDER = analysis;
+
+  // Don't surface the banner until we've actually received a message on
+  // both sides — otherwise the user just sees a "Gathering data…" noise
+  // strip before the comparison has anything to score. As soon as the
+  // first decoded message lands on each side, this gate flips and the
+  // banner appears with a real verdict (or with a meaningful pending
+  // headline while we accumulate the rest of the minMessagesPerSide
+  // threshold).
+  if (analysis.counts.kafka < 1 || analysis.counts.pulsar < 1) {
+    banner.hidden = true;
+    if (MIG_PANEL_OPEN) toggleMigrationPanel(false);
+    return;
+  }
+
+  // ── Banner ──────────────────────────────────────────────────────────────
+  const copy = MIG_STATE_COPY[analysis.state] || MIG_STATE_COPY.pending;
+  banner.hidden = false;
+  banner.dataset.state = analysis.state;
+  document.getElementById('mb-light').textContent = copy.icon;
+  document.getElementById('mb-title').textContent = copy.title;
+
+  // Build the human subtitle: clearly state what RCP needs vs what we see.
+  const tc = analysis.tally.critical;
+  const ti = analysis.tally.important;
+  const inField  = (t) => (t.match + t.neutral);                   // fields not flagged as a gap (match or upstream-empty)
+  const okCrit   = inField(tc);
+  const okImp    = inField(ti);
+  let bannerSub;
+  if (analysis.state === 'pending') {
+    bannerSub = `${analysis.pair.name} · ${analysis.counts.kafka}/${analysis.counts.minMsgs} Kafka msgs · ${analysis.counts.pulsar}/${analysis.counts.minMsgs} Pulsar msgs — keep both streams running to score.`;
+  } else if (analysis.state === 'red') {
+    bannerSub = `${analysis.pair.name} · ${tc.gap} critical RCP field${tc.gap === 1 ? '' : 's'} missing on Pulsar. Click for the full breakdown and remediation steps.`;
+  } else if (analysis.state === 'amber') {
+    bannerSub = `${analysis.pair.name} · all ${tc.total} critical fields OK on Pulsar, but ${ti.gap} important field${ti.gap === 1 ? ' is' : 's are'} only seen on Kafka.`;
+  } else {
+    bannerSub = `${analysis.pair.name} · all ${tc.total} critical and ${ti.total} important fields RCP consumes are present in Pulsar. Click for the cutover checklist.`;
+  }
+  document.getElementById('mb-sub').textContent = bannerSub;
+
+  // Build the meta-tag chips on the banner so you can see the counts without
+  // opening the modal.
+  const tag = (cls, label) => `<span class="mb-tag ${cls}">${esc(label)}</span>`;
+  const meta = [];
+  meta.push(tag(tc.gap ? 'crit' : 'ok', `Critical ${okCrit}/${tc.total}`));
+  meta.push(tag(ti.gap ? 'imp'  : 'ok', `Important ${okImp}/${ti.total}`));
+  meta.push(tag('', `${analysis.counts.kafka} Kafka · ${analysis.counts.pulsar} Pulsar`));
+  document.getElementById('mb-meta').innerHTML = meta.join('');
+
+  banner.title = `${analysis.pair.name} — click for the full required-field breakdown`;
+
+  // If the modal is open, re-render it so it stays in sync.
+  if (MIG_PANEL_OPEN) renderMigrationPanel(analysis);
+}
+
+function migDebouncedRecheck() {
+  clearTimeout(MIG_DEBOUNCE);
+  MIG_DEBOUNCE = setTimeout(migrationRecheck, 180);
+}
+
+function toggleMigrationPanel(show) {
+  const overlay = document.getElementById('migration-overlay');
+  const panel   = document.getElementById('migration-panel');
+  if (show) {
+    if (!MIG_LAST_RENDER) migrationRecheck();
+    if (!MIG_LAST_RENDER) return;       // no active pair → no modal
+    renderMigrationPanel(MIG_LAST_RENDER);
+    overlay.hidden = false;
+    // Trigger transitions after the elements are in the DOM.
+    requestAnimationFrame(() => {
+      overlay.dataset.open = 'true';
+      panel.dataset.open   = 'true';
+    });
+    MIG_PANEL_OPEN = true;
+    document.body.style.overflow = 'hidden';
+  } else {
+    overlay.dataset.open = 'false';
+    panel.dataset.open   = 'false';
+    setTimeout(() => { overlay.hidden = true; }, 220);
+    MIG_PANEL_OPEN = false;
+    document.body.style.overflow = '';
+  }
+}
+
+function onMigrationOverlayClick(e) {
+  // Close only when the click lands on the overlay itself (the dark
+  // backdrop), not when it bubbles up from the inner modal panel.
+  if (e.target.id === 'migration-overlay') toggleMigrationPanel(false);
+}
+
+// Keyboard: Esc closes the panel.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && MIG_PANEL_OPEN) toggleMigrationPanel(false);
+});
+
+function migVerdictPill(field) {
+  if (!field.typeOk)                    return '<span class="mig-pill err">TYPE MISMATCH</span>';
+  if (field.verdict === 'match')        return '<span class="mig-pill ok">✓ both populated</span>';
+  if (field.verdict === 'bonus')        return '<span class="mig-pill bonus">+ Pulsar-only</span>';
+  if (field.verdict === 'gap' && field.severity === 'critical')  return '<span class="mig-pill err">✕ Pulsar gap</span>';
+  if (field.verdict === 'gap' && field.severity === 'important') return '<span class="mig-pill warn">⚠ Pulsar gap</span>';
+  if (field.verdict === 'gap')          return '<span class="mig-pill warn">⚠ Pulsar gap</span>';
+  return '<span class="mig-pill neutral">— upstream-empty</span>';
+}
+
+function migSeverityPill(sev) {
+  if (sev === 'critical')  return '<span class="mig-pill err">CRITICAL</span>';
+  if (sev === 'important') return '<span class="mig-pill warn">IMPORTANT</span>';
+  return '<span class="mig-pill neutral">INFO</span>';
+}
+
+function migSamplePreview(v) {
+  if (v === null || v === undefined) return '—';
+  const s = String(v);
+  return s.length > 28 ? esc(s.slice(0, 28) + '…') : esc(s);
+}
+
+function renderMigrationPanel(a) {
+  const sub = `${a.pair.consumer} · ${a.counts.pulsar} Pulsar msg${a.counts.pulsar === 1 ? '' : 's'} vs ${a.counts.kafka} Kafka msg${a.counts.kafka === 1 ? '' : 's'} · evaluated ${a.evaluatedAt.toLocaleTimeString()}`;
+  document.getElementById('migration-panel-eyebrow').textContent = 'Migration readiness · ' + a.pair.domain;
+  document.getElementById('migration-panel-title').textContent   = a.pair.name;
+  document.getElementById('migration-panel-sub').textContent     = sub;
+
+  const verdictIcon = ({ green: '✓', amber: '⚠', red: '✕', pending: '⏳' })[a.state];
+  const verdictTitle = ({ green: 'Ready to migrate', amber: 'Migrate with caveats', red: 'Do not migrate yet', pending: 'Gathering data…' })[a.state];
+
+  // ── "What RCP needs from Kafka — is it in Pulsar?" summary ─────────────
+  // Three cards, one per severity tier.  Each card renders a fraction
+  // "fields populated on Pulsar / total fields RCP reads at that tier", so
+  // anyone glancing at the modal can immediately tell whether Pulsar is
+  // hitting parity.
+  function needsCard(tier, label, tally, help) {
+    const populated = tally.match + tally.neutral;
+    const flavour = tally.gap > 0 ? (tier === 'info' ? 'warn' : (tier === 'critical' ? 'gap' : 'warn')) : 'ok';
+    return `
+      <div class="mig-needs-card ${tier} ${flavour}">
+        <div class="mnc-label">${esc(label)}</div>
+        <div class="mnc-fraction">
+          <span>${populated}</span><span class="mnc-of">/ ${tally.total}</span>
+        </div>
+        <div class="mnc-help">${esc(help)}${tally.gap ? `<br><strong style="color:${tier === 'critical' ? '#ff9b9b' : (tier === 'important' ? '#ffc777' : 'var(--primary)')}">${tally.gap} not seen on Pulsar yet</strong>` : ''}</div>
+      </div>
+    `;
+  }
+  const tallyHtml = `
+    <div class="mig-section-title">What RCP needs from Kafka — is it in Pulsar?</div>
+    <div class="mig-needs-grid">
+      ${needsCard('crit', 'Critical fields', a.tally.critical,
+        'Required for RCP business logic. Any gap blocks migration.')}
+      ${needsCard('imp', 'Important fields', a.tally.important,
+        'Mapping / enrichment. Gaps degrade RCP output but won\u2019t crash it.')}
+      ${needsCard('info', 'Info fields', a.tally.info,
+        'Optional. Surfaced for visibility, never blocks the verdict.')}
+    </div>
+  `;
+
+  // Group fields by severity, then by verdict (gaps first to draw the eye).
+  const order = { gap: 0, match: 1, bonus: 2, neutral: 3 };
+  const grouped = { critical: [], important: [], info: [] };
+  for (const f of a.fields) (grouped[f.severity] || grouped.info).push(f);
+  for (const g of Object.values(grouped)) g.sort((x, y) => (order[x.verdict] - order[y.verdict]) || x.path.localeCompare(y.path));
+
+  function tableFor(sev) {
+    const rows = grouped[sev];
+    if (!rows.length) return '';
+    return `
+      <div class="mig-section-title">${sev.toUpperCase()} <span class="pill">${rows.length} fields</span></div>
+      <table class="mig-table">
+        <thead><tr>
+          <th style="width:50%">Field</th>
+          <th>Type (proto)</th>
+          <th>Kafka</th>
+          <th>Pulsar</th>
+          <th>Verdict</th>
+        </tr></thead>
+        <tbody>
+        ${rows.map(f => `
+          <tr>
+            <td class="path">
+              <code>${esc(f.path)}</code>
+              <div class="meta">${esc(f.purpose || '—')}${f.rcpRef ? ' · <span title="' + esc(f.rcpRef) + '">' + esc(f.rcpRef) + '</span>' : ''}</div>
+            </td>
+            <td class="meta">${esc(f.type || '—')}</td>
+            <td class="meta">${f.kPop}/${a.counts.kafka} ${f.kSample !== null ? '· <code>' + migSamplePreview(f.kSample) + '</code>' : ''}</td>
+            <td class="meta">${f.pPop}/${a.counts.pulsar} ${f.pSample !== null ? '· <code>' + migSamplePreview(f.pSample) + '</code>' : ''}</td>
+            <td>${migVerdictPill(f)}</td>
+          </tr>
+        `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // Per-pair operational checklist surfaced on the GREEN verdict.  Kept in
+  // sync with response/RCP-MULTI-TOPIC-MIGRATION-READINESS.md.
+  const greenChecklist = {
+    'soccer-gamestate': [
+      'Confirm the Pulsar consumer wires <code>GameStateOutbound.Api.parseFrom(bytes)</code> the same way the Kafka consumer does (no schema envelope).',
+      'Run dual-consume in staging for 24–48 h and diff converted-fixture output against production.',
+      'Keep the Kafka consumer bean disabled-but-wired for one sprint as a rollback path.'
+    ],
+    'live-mappings': [
+      'Bundle the <code>feeds-msv-v2</code> proto JAR with the Pulsar consumer; <code>MappingDeserializer</code> code ports verbatim.',
+      'Verify Kafka record headers (<code>msv_type</code>, <code>msv_sport</code>, propagated <code>headers{}</code>) round-trip through the connector — same keys, same values per message.',
+      'Confirm tombstones (null payload + <code>msv_type</code> header) reach <code>HeadersToEntityCaseConverter</code> identically on Pulsar.',
+      'Dual-consume in staging and diff converted Fixture/Competition/Meeting/Race outputs for 24 h.'
+    ],
+    'competition-prematch-stats': [
+      'Confirm the connector either preserves the leading non-JSON prefix or strips it before publishing to Pulsar — match what <code>StatsHandlerDeserializer.findJsonStart</code> expects.',
+      'Register the same Jackson <code>ObjectMapper</code> + Kotlin module that deserialises <code>CompetitionMessage</code> today.',
+      'Verify the <code>buildHeadersAsMap(header)</code> result on Pulsar mirrors Kafka one-for-one (powers RcpContext correlation IDs).',
+      'Dual-consume + diff league-standings output for one full publish cycle.'
+    ],
+    'fixture-prematch-stats': [
+      'Same prefix-byte / ObjectMapper checklist as competition pre-match stats — they share <code>StatsHandlerDeserializer</code>.',
+      'Spot-check <code>body.homeTeam.name</code> / <code>body.awayTeam.name</code> always populated; <code>FootballTeamConverter.isValidTeam</code> short-circuits on missing names.',
+      'Dual-consume across both leagues with and without past head-to-head data to exercise <code>FootballPastFixtureConverter</code>.'
+    ]
+  };
+  const recs = (() => {
+    const out = [];
+    if (a.state === 'pending') {
+      out.push('Let both consumers run for another minute or pick a busier fixture so the engine has enough samples to score reliably.');
+    } else if (a.state === 'red') {
+      const gaps = a.fields.filter(f => f.severity === 'critical' && (f.verdict === 'gap' || !f.typeOk));
+      out.push('Critical gaps observed: <ul>' + gaps.map(g => `<li><code>${esc(g.path)}</code> — ${g.typeOk ? 'present in Kafka but not in Pulsar' : 'type mismatch'} (${esc(g.purpose || '—')})</li>`).join('') + '</ul>');
+      out.push('Re-capture against the same fixture / event set on both sides to rule out data-sampling. If the gap persists, escalate to the Pulsar producer / connector team before cutover.');
+    } else if (a.state === 'amber') {
+      const gaps = a.fields.filter(f => f.severity === 'important' && (f.verdict === 'gap' || !f.typeOk));
+      out.push('All critical fields show parity. The following important fields show Kafka-only: <ul>' + gaps.map(g => `<li><code>${esc(g.path)}</code> — ${esc(g.purpose || '—')}</li>`).join('') + '</ul>');
+      out.push('Most "important" gaps are protobuf / JSON default-omission on whichever side happened not to populate them in this window. Re-capture with a richer event set to flip these to green.');
+    } else {
+      out.push('Schema and population parity are intact for every required field. Recommended next steps before cutover:');
+      const checklist = greenChecklist[a.pair.id] || ['Run dual-consume in staging for 24–48 h and diff downstream output before flipping production.'];
+      out.push('<ul>' + checklist.map(li => `<li>${li}</li>`).join('') + '</ul>');
+    }
+    out.push('<div style="margin-top:10px;font-size:11.5px;color:var(--text-tertiary)">Field audit references: <code>migration-pairs.json</code> · <code>response/RCP-MULTI-TOPIC-MIGRATION-READINESS.md</code></div>');
+    return out.join('');
+  })();
+
+  document.getElementById('migration-panel-body').innerHTML = `
+    <div class="mig-verdict" data-state="${a.state}">
+      <span class="mv-icon">${verdictIcon}</span>
+      <div>
+        <div class="mv-title">${esc(verdictTitle)}</div>
+        <div class="mv-sub">${esc(a.headline)}</div>
+      </div>
+      <div>
+        <div class="mv-score">${esc(a.label.split('·')[0].trim())}</div>
+        <div class="mv-score-sub">${esc(a.pair.consumer)}</div>
+      </div>
+    </div>
+    ${tallyHtml}
+    ${tableFor('critical')}
+    ${tableFor('important')}
+    ${tableFor('info')}
+    <div class="mig-recs"><strong>Recommendation:</strong> ${recs}</div>
+  `;
+}
+
+loadMigrationPairs();
 
 window.addEventListener('beforeunload', () => stopCompare());
 </script>

@@ -17,6 +17,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 const KAFKA_CONFIG_FILE = path.join(__dirname, 'kafka-config.json');
+// Curated catalogue of Kafka→Pulsar migration pairs + their required fields.
+// Powers the "migration readiness" badge on the compare page; see
+// migration-pairs.json for the schema and severity model.
+const MIGRATION_PAIRS_FILE = path.join(__dirname, 'migration-pairs.json');
 
 const { Kafka, logLevel } = require('kafkajs');
 
@@ -372,6 +376,23 @@ app.post('/api/produce', async (req, res) => {
   ], 15000);
 
   res.json(result);
+});
+
+// Migration pairs registry — read-only catalogue used by compare.html to
+// score Kafka→Pulsar parity in real time. We re-read the JSON on every
+// request so edits don't require a server bounce; the file is small (~6 KB).
+app.get('/api/migration-pairs', (_req, res) => {
+  try {
+    const raw = fs.readFileSync(MIGRATION_PAIRS_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    res.json(parsed);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      res.json({ version: 1, pairs: [] });
+    } else {
+      res.status(500).json({ error: 'Failed to read migration-pairs.json: ' + err.message });
+    }
+  }
 });
 
 // Tool presence check

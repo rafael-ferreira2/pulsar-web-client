@@ -55,6 +55,19 @@ When production samples are added, place them under `production/` and extend the
 
 ---
 
+## RCP ↔ Pulsar migration readiness audit
+
+These documents power the **migration readiness chip** on `/compare.html` and back the go/no-go decision for cutting RCP from Kafka to Pulsar:
+
+| Document | Scope |
+|----------|-------|
+| [RCP-MULTI-TOPIC-MIGRATION-READINESS.md](RCP-MULTI-TOPIC-MIGRATION-READINESS.md) | **Start here** — go/no-go matrix for every RCP-consumed topic + how the UI chip computes its verdict. |
+| [RCP-PULSAR-PARITY-ANALYSIS.md](RCP-PULSAR-PARITY-ANALYSIS.md) | Deep-dive on `soccer-gamestate`: which protobuf paths RCP dereferences, why "Kafka-only" diffs are data-sampling artefacts, cutover checklist. |
+| [RCP-PULSAR-FIELD-MAP.md](RCP-PULSAR-FIELD-MAP.md) | Field-by-field table for `soccer-gamestate` with RCP citations, presence in each capture, and converter references. |
+| [rcp-field-map.csv](rcp-field-map.csv) / [rcp-field-map.json](rcp-field-map.json) | Programmatic output of `test/rcp-field-map.js` — same data as the .md table, in spreadsheet-friendly form. |
+
+---
+
 ## Directory layout
 
 ```

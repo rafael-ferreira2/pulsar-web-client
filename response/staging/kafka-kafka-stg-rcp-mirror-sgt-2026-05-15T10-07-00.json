@@ -1,0 +1,1764 @@
+{
+  "meta": {
+    "bus": "kafka",
+    "env": "kafka-stg-rcp-mirror",
+    "topic": "trading.soccer.prd.sgt",
+    "messageCount": 10,
+    "exportedAt": "2026-05-15T10:07:00.208Z"
+  },
+  "messages": [
+    {
+      "index": 1,
+      "timestamp": "2026-05-15T10:06:54.807Z",
+      "metaLine": "kafka partition=5 offset=0 key=\"15716908\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 4,
+          "ingressCorrelationId": "e4b0b25d-86e2-4722-b8a7-8fa0f882bc93",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:11:45.600799864Z"
+        },
+        "fixture": {
+          "sportsBookId": "15716908",
+          "expectedStartTime": {
+            "seconds": "1778425200"
+          },
+          "actualStartTime": {
+            "seconds": "1778425200"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "294185",
+              "awayParticipantRef": "107786"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "294185",
+            "type": "TEAM",
+            "name": "Swedru All Blacks",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "107786",
+            "type": "TEAM",
+            "name": "Bechem United",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "incidents": [
+          {
+            "id": "4a0ce0a4-8010-4593-811a-4dd605378ee6",
+            "type": {
+              "soccerIncidentType": "CANCELLED",
+              "sportIncidentType": "soccerIncidentType"
+            },
+            "participantRef": [
+              "107786"
+            ],
+            "externalRef": [
+              {
+                "externalId": "4a0ce0a4-8010-4593-811a-4dd605378ee6",
+                "provider": "UNKNOWN_PROVIDER"
+              }
+            ],
+            "time": {
+              "soccerIncidentTime": {
+                "period": "SECOND_HALF",
+                "clock": {
+                  "minutes": 77
+                }
+              },
+              "incidentTime": "soccerIncidentTime"
+            }
+          },
+          {
+            "id": "b1c54b81-fa99-47a6-9735-74fb146d16f1",
+            "type": {
+              "soccerIncidentType": "CANCELLED",
+              "sportIncidentType": "soccerIncidentType"
+            },
+            "participantRef": [
+              "294185"
+            ],
+            "externalRef": [
+              {
+                "externalId": "b1c54b81-fa99-47a6-9735-74fb146d16f1",
+                "provider": "UNKNOWN_PROVIDER"
+              }
+            ],
+            "time": {
+              "soccerIncidentTime": {
+                "period": "SECOND_HALF",
+                "clock": {
+                  "minutes": 89
+                }
+              },
+              "incidentTime": "soccerIncidentTime"
+            }
+          },
+          {
+            "id": "f611bc48-45a6-4154-84c0-17ef1dd100cc",
+            "type": {
+              "soccerIncidentType": "PERIOD_TRANSITION",
+              "sportIncidentType": "soccerIncidentType"
+            },
+            "time": {
+              "soccerIncidentTime": {
+                "period": "END_OF_MATCH",
+                "clock": {
+                  "minutes": 90
+                }
+              },
+              "incidentTime": "soccerIncidentTime"
+            },
+            "qualifiers": {
+              "soccerIncidentQualifiers": {
+                "qualifiers": [
+                  {
+                    "qualifier": "END_OF_MATCH"
+                  }
+                ]
+              },
+              "incidentQualifiers": "soccerIncidentQualifiers"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "107786",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "107786",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "107786",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "294185",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "294185",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "294185",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 2,
+      "timestamp": "2026-05-15T10:06:54.966Z",
+      "metaLine": "kafka partition=5 offset=1 key=\"15719256\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 1,
+          "ingressCorrelationId": "121a06fc-df49-4413-bf1c-92eb7da87e33",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:11:47.011076325Z"
+        },
+        "fixture": {
+          "sportsBookId": "15719256",
+          "expectedStartTime": {
+            "seconds": "1778509800"
+          },
+          "actualStartTime": {
+            "seconds": "1778509800"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "311107",
+              "awayParticipantRef": "311108"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "311107",
+            "type": "TEAM",
+            "name": "FC Asia Talas",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "311108",
+            "type": "TEAM",
+            "name": "FC Ozgon",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "311107",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311107",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311107",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311108",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311108",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311108",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 3,
+      "timestamp": "2026-05-15T10:06:54.966Z",
+      "metaLine": "kafka partition=5 offset=2 key=\"15717438\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 2,
+          "ingressCorrelationId": "4e07a30c-06ce-4480-9aa0-ac0647677c9b",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:11:47.411460618Z"
+        },
+        "fixture": {
+          "sportsBookId": "15717438",
+          "expectedStartTime": {
+            "seconds": "1778511600"
+          },
+          "actualStartTime": {
+            "seconds": "1778511600"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "61727",
+              "awayParticipantRef": "16804"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "61727",
+            "type": "TEAM",
+            "name": "SC Grobina",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "16804",
+            "type": "TEAM",
+            "name": "FK Jelgava",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "16804",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "16804",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "16804",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "61727",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "61727",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "61727",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 4,
+      "timestamp": "2026-05-15T10:06:54.966Z",
+      "metaLine": "kafka partition=5 offset=3 key=\"15722073\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 2,
+          "ingressCorrelationId": "9e6f6b1e-7636-4f11-8ddf-9affbed6e598",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:11:47.581235008Z"
+        },
+        "fixture": {
+          "sportsBookId": "15722073",
+          "expectedStartTime": {
+            "seconds": "1778511600"
+          },
+          "actualStartTime": {
+            "seconds": "1778511600"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "3488",
+              "awayParticipantRef": "3870"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "3488",
+            "type": "TEAM",
+            "name": "Club S Hammam-Lif",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "3870",
+            "type": "TEAM",
+            "name": "ES Hammam Sousse",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "3488",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3488",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3488",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3870",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3870",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3870",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 5,
+      "timestamp": "2026-05-15T10:06:54.966Z",
+      "metaLine": "kafka partition=5 offset=4 key=\"15719256\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 2,
+          "ingressCorrelationId": "a7de0571-5833-4be9-b3c4-2ae8cc1b5f21",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:34:54.682120990Z"
+        },
+        "fixture": {
+          "sportsBookId": "15719256",
+          "expectedStartTime": {
+            "seconds": "1778509800"
+          },
+          "actualStartTime": {
+            "seconds": "1778509800"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "311107",
+              "awayParticipantRef": "311108"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "311107",
+            "type": "TEAM",
+            "name": "FC Asia Talas",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "311108",
+            "type": "TEAM",
+            "name": "FC Ozgon",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "311107",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311107",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311107",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311108",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311108",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "311108",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 6,
+      "timestamp": "2026-05-15T10:06:54.967Z",
+      "metaLine": "kafka partition=5 offset=5 key=\"15717438\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 3,
+          "ingressCorrelationId": "cd37d7f1-7005-4813-92d0-73cefbc4d722",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:34:55.168115476Z"
+        },
+        "fixture": {
+          "sportsBookId": "15717438",
+          "expectedStartTime": {
+            "seconds": "1778511600"
+          },
+          "actualStartTime": {
+            "seconds": "1778511600"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "61727",
+              "awayParticipantRef": "16804"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "61727",
+            "type": "TEAM",
+            "name": "SC Grobina",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "16804",
+            "type": "TEAM",
+            "name": "FK Jelgava",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "16804",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "16804",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "16804",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "61727",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "61727",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "61727",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 7,
+      "timestamp": "2026-05-15T10:06:54.967Z",
+      "metaLine": "kafka partition=5 offset=6 key=\"15717470\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 2,
+          "ingressCorrelationId": "22be47b5-8419-4196-bf44-eb6daf633864",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:34:53.846394967Z"
+        },
+        "fixture": {
+          "sportsBookId": "15717470",
+          "expectedStartTime": {
+            "seconds": "1778529600"
+          },
+          "actualStartTime": {
+            "seconds": "1778529600"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "200995",
+              "awayParticipantRef": "149574"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "200995",
+            "type": "TEAM",
+            "name": "Renaissance Zemamra",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "149574",
+            "type": "TEAM",
+            "name": "Olympique Dcheïra",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "149574",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "149574",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "149574",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "200995",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "200995",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "200995",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 8,
+      "timestamp": "2026-05-15T10:06:54.967Z",
+      "metaLine": "kafka partition=5 offset=7 key=\"15716908\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 5,
+          "ingressCorrelationId": "48a42cd1-8084-4b4d-8d1d-967ff2a66802",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:34:53.072867556Z"
+        },
+        "fixture": {
+          "sportsBookId": "15716908",
+          "expectedStartTime": {
+            "seconds": "1778425200"
+          },
+          "actualStartTime": {
+            "seconds": "1778425200"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "294185",
+              "awayParticipantRef": "107786"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "294185",
+            "type": "TEAM",
+            "name": "Swedru All Blacks",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "107786",
+            "type": "TEAM",
+            "name": "Bechem United",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "incidents": [
+          {
+            "id": "4a0ce0a4-8010-4593-811a-4dd605378ee6",
+            "type": {
+              "soccerIncidentType": "CANCELLED",
+              "sportIncidentType": "soccerIncidentType"
+            },
+            "participantRef": [
+              "107786"
+            ],
+            "externalRef": [
+              {
+                "externalId": "4a0ce0a4-8010-4593-811a-4dd605378ee6",
+                "provider": "UNKNOWN_PROVIDER"
+              }
+            ],
+            "time": {
+              "soccerIncidentTime": {
+                "period": "SECOND_HALF",
+                "clock": {
+                  "minutes": 77
+                }
+              },
+              "incidentTime": "soccerIncidentTime"
+            }
+          },
+          {
+            "id": "b1c54b81-fa99-47a6-9735-74fb146d16f1",
+            "type": {
+              "soccerIncidentType": "CANCELLED",
+              "sportIncidentType": "soccerIncidentType"
+            },
+            "participantRef": [
+              "294185"
+            ],
+            "externalRef": [
+              {
+                "externalId": "b1c54b81-fa99-47a6-9735-74fb146d16f1",
+                "provider": "UNKNOWN_PROVIDER"
+              }
+            ],
+            "time": {
+              "soccerIncidentTime": {
+                "period": "SECOND_HALF",
+                "clock": {
+                  "minutes": 89
+                }
+              },
+              "incidentTime": "soccerIncidentTime"
+            }
+          },
+          {
+            "id": "f611bc48-45a6-4154-84c0-17ef1dd100cc",
+            "type": {
+              "soccerIncidentType": "PERIOD_TRANSITION",
+              "sportIncidentType": "soccerIncidentType"
+            },
+            "time": {
+              "soccerIncidentTime": {
+                "period": "END_OF_MATCH",
+                "clock": {
+                  "minutes": 90
+                }
+              },
+              "incidentTime": "soccerIncidentTime"
+            },
+            "qualifiers": {
+              "soccerIncidentQualifiers": {
+                "qualifiers": [
+                  {
+                    "qualifier": "END_OF_MATCH"
+                  }
+                ]
+              },
+              "incidentQualifiers": "soccerIncidentQualifiers"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "107786",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "107786",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "107786",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "294185",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "294185",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "294185",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 9,
+      "timestamp": "2026-05-15T10:06:54.967Z",
+      "metaLine": "kafka partition=5 offset=8 key=\"15722073\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 3,
+          "ingressCorrelationId": "fc91fbc2-23c8-4bed-b36b-1c724564b114",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T10:34:55.353234211Z"
+        },
+        "fixture": {
+          "sportsBookId": "15722073",
+          "expectedStartTime": {
+            "seconds": "1778511600"
+          },
+          "actualStartTime": {
+            "seconds": "1778511600"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "3488",
+              "awayParticipantRef": "3870"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "3488",
+            "type": "TEAM",
+            "name": "Club S Hammam-Lif",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "3870",
+            "type": "TEAM",
+            "name": "ES Hammam Sousse",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "3488",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3488",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3488",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3870",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3870",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "3870",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 10,
+      "timestamp": "2026-05-15T10:06:54.968Z",
+      "metaLine": "kafka partition=5 offset=9 key=\"15723417\"",
+      "decodeKind": "proto",
+      "content": {
+        "meta": {
+          "version": "1.1.92",
+          "highWaterMark": 1,
+          "ingressCorrelationId": "f5d434e7-ee14-4f64-84df-389deb135820",
+          "feedStatus": [
+            {
+              "provider": "UNKNOWN_PROVIDER",
+              "features": {
+                "supportedIncidentTypes": [
+                  {
+                    "soccerIncidentType": "UNCONFIRMED_SHOT",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_OFF_TARGET",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SHOT_SAVED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "CANCELLED",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "FOUL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "GOAL",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "SUBSTITUTION",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  },
+                  {
+                    "soccerIncidentType": "YELLOW_RED_CARD",
+                    "sportIncidentType": "soccerIncidentType"
+                  }
+                ]
+              }
+            }
+          ],
+          "ingressCorrelationTimestamp": "2026-05-11T13:28:51.066442538Z"
+        },
+        "fixture": {
+          "sportsBookId": "15723417",
+          "expectedStartTime": {
+            "seconds": "1778540400"
+          },
+          "actualStartTime": {
+            "seconds": "1778540400"
+          },
+          "attributes": {
+            "soccerAttributes": {
+              "homeParticipantRef": "248999",
+              "awayParticipantRef": "52623"
+            },
+            "sportAttributes": "soccerAttributes"
+          }
+        },
+        "participants": [
+          {
+            "id": "248999",
+            "type": "TEAM",
+            "name": "Araucaria EC PR",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          },
+          {
+            "id": "52623",
+            "type": "TEAM",
+            "name": "Rio Branco SC",
+            "info": {
+              "teamAttributes": {
+                "soccerTeamAttributes": {
+                  "formation": {
+                    "value": "Null"
+                  }
+                },
+                "participantAttributes": "soccerTeamAttributes"
+              },
+              "teamPlayerAttributes": "teamAttributes"
+            }
+          }
+        ],
+        "stats": {
+          "matchStat": [
+            {
+              "participantRef": "248999",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "248999",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "248999",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "52623",
+              "type": {
+                "soccerStatType": "BALL_POSSESSION",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "52623",
+              "type": {
+                "soccerStatType": "ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            },
+            {
+              "participantRef": "52623",
+              "type": {
+                "soccerStatType": "DANGEROUS_ATTACKS",
+                "sportStatType": "soccerStatType"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "session_log": [
+    {
+      "timestamp": "2026-05-15T10:06:46.855Z",
+      "event": "consume_started",
+      "topic": "trading.soccer.prd.sgt"
+    }
+  ]
+}
